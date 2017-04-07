@@ -44,15 +44,16 @@ public class Tree <K, V> {
      *         The node.
      */
     public void put(final Node<K, V> node) {
-        map.put(node.getKey(), node);
+        final long estimatedNodeSize = NodeInstrumentation.getNodeSize(node);
 
-        // todo Determine the size of the new node.
-
-        // todo Increment currentSize by the size of the new node.
-
-        if (currentSize >= maximumSize) {
+        // If the tree will exceed it's maximum size by adding the new node,
+        // then perform a merge before adding the new node.
+        if (currentSize + estimatedNodeSize >= maximumSize) {
             merge();
         }
+
+        map.put(node.getKey(), node);
+        currentSize += estimatedNodeSize;
     }
 
     /**
@@ -70,11 +71,13 @@ public class Tree <K, V> {
         // todo If a node with the specified key doesn't exist in the in-memory map, then search the on-disk maps.
 
         // todo Return an Optional
+        return Optional.empty(); // REPLACE THIS LINE WHEN CODE IS WRITTEN.
     }
 
     public void merge() {
         // todo Implement merge.
         // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
+        map.clear();
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
