@@ -8,7 +8,7 @@ public class Tree <K, V> {
     /** The maximum size of the tree, in kilobytes, before a Merge must occur. */
     private final int maximumSize;
     /** The current size of the tree, in kilobytes. */
-    private int currentSize;
+    private int currentSize = 0;
     /** The underlying data structure of the tree. */
     private final ConcurrentSkipListMap<K, Node<K, V>> map = new ConcurrentSkipListMap<>();
 
