@@ -1,5 +1,8 @@
 package main.com.valkryst.VcLSM;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -18,8 +21,15 @@ public class Tree <K, V> {
      * @param maximumSize
      *         The maximum size of the tree, in kilobytes, before a Merge must occur.
      */
-    public Tree(final int maximumSize) {
-        this.maximumSize = maximumSize;
+    public Tree(final int maximumSize) throws IllegalArgumentException {
+        if (maximumSize <= 0) {
+            final Logger logger = LogManager.getLogger();
+            logger.error("The maximumSize of a Tree cannot be less than 1 kilobyte.");
+
+            this.maximumSize = 1;
+        } else {
+            this.maximumSize = maximumSize;
+        }
     }
 
     /**
