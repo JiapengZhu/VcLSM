@@ -1,4 +1,4 @@
-package main.com.valkryst.VcLSM;
+package main.com.valkryst.VcLSM.node;
 
 import lombok.Getter;
 
