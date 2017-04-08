@@ -31,12 +31,14 @@ public class FileMerger {
             final List<File> files = getFilesInSizeRange(minLength, maxLength);
             final ListIterator<File> iterator = files.listIterator();
 
-            // Don't bother merging unless there at-least 4 files to merge.
+            // Save computation time by only merging when there are at-least 4 files
+            // within the list.
             // The value 4 is arbitrary.
             if (files.size() < 4) {
                 continue;
             }
 
+            // For each file in the list, merge the previous and current files.
             while (iterator.hasNext()) {
                 final File previous = iterator.previous();
                 final File current = iterator.next();
@@ -87,6 +89,8 @@ public class FileMerger {
             return validFiles;
         }
 
+        // For each file, if the file-size is within the specified range, then
+        // add it to the list of valid files.
         for (final File file : allFiles) {
             final long fileLength = file.length() / 1000;
 
