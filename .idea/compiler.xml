@@ -11,7 +11,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="VcLSM" target="1.5" />
+      <module name="VcLSM" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
