@@ -87,6 +87,7 @@ public class Tree <K, V> {
     public void merge() {
         // todo Implement merge.
         // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
+
         map.clear();
     }
 
