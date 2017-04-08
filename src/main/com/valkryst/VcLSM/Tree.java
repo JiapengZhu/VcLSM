@@ -88,6 +88,11 @@ public class Tree <K, V> {
         // todo Implement merge.
         // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
 
+        // Merge all of the on-disk files:
+        final FileMerger fileMerger = new FileMerger();
+        fileMerger.merge(maximumSize);
+
+        // Clear the in-memory structure:
         map.clear();
     }
 
