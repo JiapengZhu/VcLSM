@@ -78,12 +78,18 @@ public class Tree <K, V> {
      *         The found node.
      */
     public Optional<Node<K, V>> search(final K key) {
-        // todo Use the get function to search the map to see if a node with the specified key exists within.
+        // Search the in-memory map:
+        Optional<Node<K, V>> result = get(key);
 
-        // todo If a node with the specified key doesn't exist in the in-memory map, then search the on-disk maps.
+        if (result.isPresent()) {
+            return result;
+        }
 
-        // todo Return an Optional
-        return Optional.empty(); // REPLACE THIS LINE WHEN CODE IS WRITTEN.
+        // Search each of the on-disk files
+        final FileSearcher<K, V> fileSearcher = new FileSearcher<>();
+        result = fileSearcher.search(key);
+
+        return result;
     }
 
     public void merge() {
