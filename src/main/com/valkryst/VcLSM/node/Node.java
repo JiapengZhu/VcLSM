@@ -4,7 +4,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-public class Node <K, V> {
+public class Node <K, V> implements Comparable<Node<K, V>> {
     /** The key. */
     @Getter private final K key;
     /** The date & time at which the node was created. */
@@ -22,5 +22,10 @@ public class Node <K, V> {
         key = builder.getKey();
         time = LocalDateTime.now();
         value = builder.getValue();
+    }
+
+    @Override
+    public int compareTo(Node<K, V> other) {
+        return this.time.compareTo(other.time);
     }
 }
