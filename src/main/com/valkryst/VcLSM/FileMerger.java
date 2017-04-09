@@ -82,7 +82,13 @@ public class FileMerger {
      *         A list of all files within the data directory whose file-sizes are within the specified range.
      */
     private List<File> getFilesInSizeRange(final long minLength, final long maxLength) {
-        final File[] allFiles = new File("/data/").listFiles();
+        final File[] allFiles = new File("/data/").listFiles(pathname -> {
+            boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
+            accept &= pathname.isFile();
+
+            return accept;
+        });
+
         final List<File> validFiles = new ArrayList<>();
 
         if (allFiles == null) {
