@@ -82,6 +82,7 @@ public class FileMerger {
      *         A list of all files within the data directory whose file-sizes are within the specified range.
      */
     private List<File> getFilesInSizeRange(final long minLength, final long maxLength) {
+        // Retrieve all files in the data folder that end with the ".dat" extension:
         final File[] allFiles = new File("/data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
             accept &= pathname.isFile();
