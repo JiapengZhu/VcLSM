@@ -4,8 +4,6 @@ import main.com.valkryst.VcLSM.node.Node;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -69,8 +67,6 @@ public class FileSearcher <K, V>{
         try (
             final InputStream is = new FileInputStream(file);
         ) {
-            final JsonObject object = Json.createReader(is).readObject();
-
             // todo Read the contents of the JSON file. If a node is found, then
             // todo construct the Node object and return Optional.ofNullable(node).
             // todo Else return Optional.empty().
