@@ -1,6 +1,7 @@
 package main.com.valkryst.VcLSM.node;
 
 import lombok.Getter;
+import main.com.valkryst.VcLSM.C;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +12,8 @@ public class Node <K, V> implements Comparable<Node<K, V>> {
     @Getter private final LocalDateTime time;
     /** The value. */
     @Getter private final V value;
+
+
 
     /**
      * Constructs a new Node.
@@ -27,5 +30,13 @@ public class Node <K, V> implements Comparable<Node<K, V>> {
     @Override
     public int compareTo(Node<K, V> other) {
         return this.time.compareTo(other.time);
+    }
+
+
+
+
+
+    public String getKeyWithTimestamp(){
+        return key + C.DILIMETER + time;
     }
 }
