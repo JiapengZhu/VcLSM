@@ -13,13 +13,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Tree <K, V> {
+public class Tree <V> {
     /** The maximum size of the tree, in kilobytes, before a Merge must occur. */
     private final int maximumSize;
     /** The current size of the tree, in kilobytes. */
     private int currentSize = 0;
     /** The underlying data structure of the tree. */
-    private final ConcurrentSkipListMap<K, Node<K, V>> map = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<String, Node<V>> map = new ConcurrentSkipListMap<>();
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
@@ -53,7 +53,7 @@ public class Tree <K, V> {
      * @return
      *         The found node.
      */
-    public Optional<Node<K, V>> get(final K key) {
+    public Optional<Node<V>> get(final String key) {
         return Optional.ofNullable(map.get(key));
     }
 
@@ -63,7 +63,7 @@ public class Tree <K, V> {
      * @param node
      *         The node.
      */
-    public void put(final Node<K, V> node) {
+    public void put(final Node<V> node) {
         readLock.lock();
         final long estimatedNodeSize = NodeInstrumentation.getNodeSize(node);
 
@@ -73,8 +73,7 @@ public class Tree <K, V> {
             merge();
         }
 
-        String key = node.getKeyWithTimestamp();
-        map.put((K)key, node);
+        map.put(node.getKeyWithTimestamp(), node);
         currentSize += estimatedNodeSize;
         readLock.unlock();
     }
@@ -88,54 +87,53 @@ public class Tree <K, V> {
      * @return
      *         The found node.
      */
-    public Optional<Node<K, V>> search(final K key) {
+    public Optional<Node<V>> search(final String key) {
         // Search the in-memory map:
-        Optional<Node<K, V>> result = get(key);
+        Optional<Node<V>> result = get(key);
 
         if (result.isPresent()) {
             return result;
         }
 
         // Search each of the on-disk files
-        final FileSearcher<K, V> fileSearcher = new FileSearcher<>();
+        final FileSearcher<V> fileSearcher = new FileSearcher<>();
         result = fileSearcher.search(key);
 
         return result;
     }
 
     public void merge() {
-        // todo Implement merge.
-        // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
-        // Before the merge
+        // Before Merge:
         writeLock.lock();
 
-        // create a new in-memory component, new compinent will be immutable and merged into disk
-        // old in-memory component will be mutable and reused
-        ConcurrentSkipListMap<K, Node<K, V>> newMap = new ConcurrentSkipListMap<K, Node<K, V>> ();
+        // Create a new in-memory map, this is immutable and will be merged onto disk.
+        // The old in-memory map will is mutable and will be reused.
+        final ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<String, Node<V>> ();
         newMap.putAll(map);
         map.clear();
         writeLock.unlock();
 
-        // Doing Merge...
+        // Merge:
         try {
             writeLock.lock();
             final FileMerger fileMerger = new FileMerger();
-            String fileName = System.currentTimeMillis() + ".json";
+            final String fileName = System.currentTimeMillis() + ".json";
+
             // Merge in-memory data into disk
             fileMerger.mergeToDisk(newMap, fileName);
+
             // Merge all of the on-disk files:
             fileMerger.merge(maximumSize);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
+        } catch (final IOException e) {
+            final Logger logger = LogManager.getLogger();
+            logger.error(e.getMessage());
+        } finally {
             writeLock.unlock();
         }
 
-        // After merge
+        // After mMerge:
         writeLock.lock();
-        // Clear the in-memory structure:
         newMap.clear();
-        //map.clear();
         writeLock.unlock();
     }
 

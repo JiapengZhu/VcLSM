@@ -4,12 +4,15 @@ import main.com.valkryst.VcLSM.node.Node;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class FileSearcher <K, V>{
+public class FileSearcher <V>{
     /**
      * Searches through all .dat files within the data directory for the first occurrence of a node using the specified
      * key.
@@ -20,9 +23,9 @@ public class FileSearcher <K, V>{
      * @return
      *         The node, or nothing if no node is found.
      */
-    public Optional<Node<K, V>> search(final K key) {
+    public Optional<Node<V>> search(final String key) {
         for (final File file : getSortedFiles()) {
-            final Optional<Node<K, V>> opt = searchFile(key, file);
+            final Optional<Node<V>> opt = searchFile(key, file);
 
             // Return the first occurrence of a node using the specified key.
             if (opt.isPresent()) {
@@ -63,7 +66,7 @@ public class FileSearcher <K, V>{
      * @return
      *         The node, or nothing if no node is found.
      */
-    private Optional<Node<K, V>> searchFile(final K key, final File file) {
+    private Optional<Node<V>> searchFile(final String key, final File file) {
         try (
             final InputStream is = new FileInputStream(file);
         ) {

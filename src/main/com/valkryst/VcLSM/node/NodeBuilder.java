@@ -3,9 +3,9 @@ package main.com.valkryst.VcLSM.node;
 import lombok.Getter;
 import lombok.Setter;
 
-public class NodeBuilder <K, V> {
+public class NodeBuilder <V> {
     /** The key. */
-    @Getter @Setter private K key = null;
+    @Getter @Setter private String key = null;
     /** The value. */
     @Getter @Setter private V value = null;
 
@@ -32,6 +32,10 @@ public class NodeBuilder <K, V> {
     private void checkState() throws IllegalStateException {
         if (key == null) {
             throw new IllegalStateException("A Node cannot have a null key.");
+        }
+
+        if (key.isEmpty()) {
+            throw new IllegalStateException("A Node cannot have an empty key.");
         }
 
         if (value == null) {
