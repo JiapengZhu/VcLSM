@@ -92,9 +92,6 @@ public class FileMerger<K, V> {
      *         The second file.
      */
     private void mergeFiles(final File fileA, final File fileB) {
-        // todo Place the contents of fileB into fileA.
-        // todo Delete fileB.
-        // todo This depends on which storage format we use. It will be different for JSON, txt, and Serialized files.
         Set<String> s = new HashSet<String>();
         JsonNode rootNodeA, rootNodeB;
         ArrayNode objArrNodeA = mapper.createArrayNode();
