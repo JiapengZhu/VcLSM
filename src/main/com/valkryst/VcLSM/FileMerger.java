@@ -141,17 +141,18 @@ public class FileMerger<V> {
 
             // Merge duplicated data in merged file
             int k = 0; // trace the index
-            Iterator<Map.Entry<String, JsonNode>> aObjNodeFields = aObjNodes.fields();
-            ArrayNode keyWithTimeArr = mapper.createArrayNode(); // trace the old keys with timestamp
+            final Iterator<Map.Entry<String, JsonNode>> aObjNodeFields = aObjNodes.fields();
+            final ArrayNode keyWithTimeArr = mapper.createArrayNode(); // trace the old keys with timestamp
 
             while(aObjNodeFields.hasNext()){
-                Map.Entry<String, JsonNode> entry = aObjNodeFields.next();
-                JsonNode entryValueNode = entry.getValue();
-                String entryKeyNode = entry.getKey();
+                final Map.Entry<String, JsonNode> entry = aObjNodeFields.next();
+                final JsonNode entryValueNode = entry.getValue();
+                final String entryKeyNode = entry.getKey();
 
                 if (!s.add(entryValueNode.path(C.K).asText())) {
-                    String oldKeyWithTime = keyWithTimeArr.get(k-1).asText();
-                    JsonNode oldEntryValueNode = aObjNodes.get(oldKeyWithTime);
+                    final String oldKeyWithTime = keyWithTimeArr.get(k-1).asText();
+                    final JsonNode oldEntryValueNode = aObjNodes.get(oldKeyWithTime);
+
                     if (isDateTimeBefore(oldEntryValueNode.path(C.TIME).asText(), entryValueNode.path(C.TIME).asText())) {
                         aObjNodes.remove(oldKeyWithTime);
                     } else {
