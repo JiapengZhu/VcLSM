@@ -5,9 +5,13 @@ import main.com.valkryst.VcLSM.node.NodeInstrumentation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Tree <K, V> {
     /** The maximum size of the tree, in kilobytes, before a Merge must occur. */
@@ -16,6 +20,10 @@ public class Tree <K, V> {
     private int currentSize = 0;
     /** The underlying data structure of the tree. */
     private final ConcurrentSkipListMap<K, Node<K, V>> map = new ConcurrentSkipListMap<>();
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private final Lock readLock = rwLock.readLock();
+    private final Lock writeLock = rwLock.writeLock();
+
 
     /**
      * Constructs a new tree.
@@ -56,6 +64,7 @@ public class Tree <K, V> {
      *         The node.
      */
     public void put(final Node<K, V> node) {
+        readLock.lock();
         final long estimatedNodeSize = NodeInstrumentation.getNodeSize(node);
 
         // If the tree will exceed it's maximum size by adding the new node,
@@ -64,8 +73,10 @@ public class Tree <K, V> {
             merge();
         }
 
-        map.put(node.getKey(), node);
+        String key = node.getKeyWithTimestamp();
+        map.put((K)key, node);
         currentSize += estimatedNodeSize;
+        readLock.unlock();
     }
 
     /**
@@ -95,13 +106,37 @@ public class Tree <K, V> {
     public void merge() {
         // todo Implement merge.
         // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
+        // Before the merge
+        writeLock.lock();
 
-        // Merge all of the on-disk files:
-        final FileMerger fileMerger = new FileMerger();
-        fileMerger.merge(maximumSize);
-
-        // Clear the in-memory structure:
+        // create a new in-memory component, new compinent will be immutable and merged into disk
+        // old in-memory component will be mutable and reused
+        ConcurrentSkipListMap<K, Node<K, V>> newMap = new ConcurrentSkipListMap<K, Node<K, V>> ();
+        newMap.putAll(map);
         map.clear();
+        writeLock.unlock();
+
+        // Doing Merge...
+        try {
+            writeLock.lock();
+            final FileMerger fileMerger = new FileMerger();
+            String fileName = System.currentTimeMillis() + ".json";
+            // Merge in-memory data into disk
+            fileMerger.mergeToDisk(newMap, fileName);
+            // Merge all of the on-disk files:
+            fileMerger.merge(maximumSize);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            writeLock.unlock();
+        }
+
+        // After merge
+        writeLock.lock();
+        // Clear the in-memory structure:
+        newMap.clear();
+        //map.clear();
+        writeLock.unlock();
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
