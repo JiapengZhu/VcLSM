@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class FileMerger<K, V> {
     private final ObjectMapper mapper = new ObjectMapper();
     private final Logger logger = LogManager.getLogger();
+
     /** Constructs a new FileMerger. */
     public FileMerger() {
         // If the data directory doesn't exist, attempt to create it:
@@ -25,7 +26,6 @@ public class FileMerger<K, V> {
 
         if (! dataDirectory.exists()) {
             if (dataDirectory.mkdir()) {
-                //final Logger logger = LogManager.getLogger();
                 logger.error("Unable to create data directory.");
                 System.exit(1); // todo Maybe attempt to create the directory a different way before exiting.
             }
@@ -92,46 +92,48 @@ public class FileMerger<K, V> {
      *         The second file.
      */
     private void mergeFiles(final File fileA, final File fileB) {
-        Set<String> s = new HashSet<String>();
-        JsonNode rootNodeA, rootNodeB;
-        ArrayNode objArrNodeA = mapper.createArrayNode();
-        ArrayNode keyArrNodeA = mapper.createArrayNode();
+        final Set<String> s = new HashSet<>();
+        final JsonNode rootNodeA, rootNodeB;
+        final ArrayNode objArrNodeA = mapper.createArrayNode();
+        final ArrayNode keyArrNodeA = mapper.createArrayNode();
 
         try {
             rootNodeA = mapper.readTree(fileA);
             rootNodeB = mapper.readTree(fileB);
 
-            ObjectNode aObjNodes = rootNodeA.deepCopy(); // Convert JsonNode to ObjectNode
-            Iterator<Map.Entry<String, JsonNode>> aFields = rootNodeA.fields();
-            Iterator<Map.Entry<String, JsonNode>> bFields = rootNodeB.fields();
+            final ObjectNode aObjNodes = rootNodeA.deepCopy(); // Convert JsonNode to ObjectNode
+            final Iterator<Map.Entry<String, JsonNode>> aFields = rootNodeA.fields();
+            final Iterator<Map.Entry<String, JsonNode>> bFields = rootNodeB.fields();
 
             while (aFields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = aFields.next();
+                final Map.Entry<String, JsonNode> entry = aFields.next();
                 objArrNodeA.add(entry.getValue()); // store Node<K, V>
                 keyArrNodeA.add(entry.getKey()); // store key with timestamp
             }
 
             while (bFields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = bFields.next();
-                JsonNode bJsonNodeVal = entry.getValue();
+                final Map.Entry<String, JsonNode> entry = bFields.next();
+                final JsonNode bJsonNodeVal = entry.getValue();
+
                 // check duplicated data between two files
                 int i = objArrNodeA.findValuesAsText(C.K).indexOf(bJsonNodeVal.path(C.K).asText());
-                if(i > 0){
+
+                if (i > 0) {
                     // if exists, check timestamps,
                     // if to-be merged data is later than merging data, update the merging data
-                    String bTime = bJsonNodeVal.path(C.TIME).asText();
-                    String aTime = objArrNodeA.get(i).path(C.TIME).asText();
+                    final String bTime = bJsonNodeVal.path(C.TIME).asText();
+                    final String aTime = objArrNodeA.get(i).path(C.TIME).asText();
 
-                    if(isDateTimeBefore(aTime, bTime)){
-                        String aNewKey = objArrNodeA.get(i).path(C.K).asText() + "+" + bTime;
+                    if (isDateTimeBefore(aTime, bTime)) {
+                        final String aNewKey = objArrNodeA.get(i).path(C.K).asText() + "+" + bTime;
                         aObjNodes.remove(keyArrNodeA.get(i).asText());
                         keyArrNodeA.remove(i);
                         aObjNodes.set(aNewKey, bJsonNodeVal);
                         keyArrNodeA.add(aNewKey);
                     }
-                }else{
+                } else {
                     // otherwise, insert merged data into merging data directly
-                    String bKeyWithTimestamp = bJsonNodeVal.path(C.K).asText() + C.DILIMETER + bJsonNodeVal.path(C.TIME).asText();
+                    final String bKeyWithTimestamp = bJsonNodeVal.path(C.K).asText() + C.DILIMETER + bJsonNodeVal.path(C.TIME).asText();
                     keyArrNodeA.add(bKeyWithTimestamp);
                     aObjNodes.set(bKeyWithTimestamp, bJsonNodeVal);
                 }
@@ -141,35 +143,40 @@ public class FileMerger<K, V> {
             int k = 0; // trace the index
             Iterator<Map.Entry<String, JsonNode>> aObjNodeFields = aObjNodes.fields();
             ArrayNode keyWithTimeArr = mapper.createArrayNode(); // trace the old keys with timestamp
+
             while(aObjNodeFields.hasNext()){
                 Map.Entry<String, JsonNode> entry = aObjNodeFields.next();
                 JsonNode entryValueNode = entry.getValue();
                 String entryKeyNode = entry.getKey();
-                if(!s.add(entryValueNode.path(C.K).asText())){
+
+                if (!s.add(entryValueNode.path(C.K).asText())) {
                     String oldKeyWithTime = keyWithTimeArr.get(k-1).asText();
                     JsonNode oldEntryValueNode = aObjNodes.get(oldKeyWithTime);
-                    if(isDateTimeBefore(oldEntryValueNode.path(C.TIME).asText(), entryValueNode.path(C.TIME).asText())){
+                    if (isDateTimeBefore(oldEntryValueNode.path(C.TIME).asText(), entryValueNode.path(C.TIME).asText())) {
                         aObjNodes.remove(oldKeyWithTime);
-                    }else{
+                    } else {
                         aObjNodeFields.remove();
                     }
-                }else{
+                } else {
                     keyWithTimeArr.add(entryKeyNode);
                 }
+
                 k++;
             }
+
             // overwrite file A by merged data
             mapper.writeValue(fileA, aObjNodes);
+
             // Delete file B
-            if(!fileB.delete()){
+            if (!fileB.delete()) {
                 logger.error("Fail to delete " + fileB.getName());
                 System.exit(1);
             }
 
            // System.out.println(aObjNodes);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (final IOException e) {
+            logger.error(e.getMessage());
         }
     }
 
@@ -217,12 +224,10 @@ public class FileMerger<K, V> {
         return validFiles;
     }
 
-    private static boolean isDateTimeBefore(String timeA, String timeB){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        LocalDateTime aLocalTime = LocalDateTime.parse(timeA, formatter);
-        LocalDateTime bLocalTime = LocalDateTime.parse(timeB, formatter);
+    private static boolean isDateTimeBefore(final String timeA, final String timeB){
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        final LocalDateTime aLocalTime = LocalDateTime.parse(timeA, formatter);
+        final LocalDateTime bLocalTime = LocalDateTime.parse(timeB, formatter);
         return aLocalTime.isBefore(bLocalTime);
     }
-
-
 }
