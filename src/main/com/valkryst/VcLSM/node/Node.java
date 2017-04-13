@@ -13,8 +13,6 @@ public class Node <K, V> implements Comparable<Node<K, V>> {
     /** The value. */
     @Getter private final V value;
 
-
-
     /**
      * Constructs a new Node.
      *
@@ -32,10 +30,7 @@ public class Node <K, V> implements Comparable<Node<K, V>> {
         return this.time.compareTo(other.time);
     }
 
-
-
-
-
+    /** @return The key concatenated with the timestamp. */
     public String getKeyWithTimestamp(){
         return key + C.DILIMETER + time;
     }
