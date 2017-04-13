@@ -108,14 +108,15 @@ public class Tree <K, V> {
         // todo Maybe we should lock the map, so that nothing can alter it while the merge is taking place.
         // Before the merge
         writeLock.lock();
+
         // create a new in-memory component, new compinent will be immutable and merged into disk
         // old in-memory component will be mutable and reused
-        ConcurrentSkipListMap<K, Node<K, V>> newMap = map;
+        ConcurrentSkipListMap<K, Node<K, V>> newMap = new ConcurrentSkipListMap<K, Node<K, V>> ();
+        newMap.putAll(map);
         map.clear();
         writeLock.unlock();
 
         // Doing Merge...
-
         try {
             writeLock.lock();
             final FileMerger fileMerger = new FileMerger();
