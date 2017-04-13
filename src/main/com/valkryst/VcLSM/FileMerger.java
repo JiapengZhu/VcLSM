@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class FileMerger<K, V> {
+public class FileMerger<V> {
     private final ObjectMapper mapper = new ObjectMapper();
     private final Logger logger = LogManager.getLogger();
 
@@ -78,7 +78,7 @@ public class FileMerger<K, V> {
      * @param fileName
      *         The output file name.
      */
-    public void mergeToDisk(ConcurrentSkipListMap<K, Node<K, V>> map, String fileName) throws IOException{
+    public void mergeToDisk(ConcurrentSkipListMap<String, Node<V>> map, String fileName) throws IOException{
         mapper.writeValue(new File("/data/"+fileName), map);
     }
 
