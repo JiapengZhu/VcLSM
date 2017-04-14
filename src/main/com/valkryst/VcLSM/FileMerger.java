@@ -226,9 +226,9 @@ public class FileMerger<V> {
     }
 
     private static boolean isDateTimeBefore(final String timeA, final String timeB){
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        final LocalDateTime aLocalTime = LocalDateTime.parse(timeA, formatter);
-        final LocalDateTime bLocalTime = LocalDateTime.parse(timeB, formatter);
+        final LocalDateTime aLocalTime = LocalDateTime.parse(timeA, C.FORMATTER);
+        final LocalDateTime bLocalTime = LocalDateTime.parse(timeB, C.FORMATTER);
         return aLocalTime.isBefore(bLocalTime);
     }
+
 }

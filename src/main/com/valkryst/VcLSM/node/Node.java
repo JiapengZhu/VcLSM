@@ -25,6 +25,13 @@ public class Node <V> implements Comparable<Node<V>> {
         value = builder.getValue();
     }
 
+    // Construct a customized constructor by specifying a timestamp
+    public Node(final String key, final V value, final LocalDateTime time){
+        this.key = key;
+        this.value = value;
+        this.time = time;
+    }
+
     @Override
     public int compareTo(final Node<V> other) {
         return this.time.compareTo(other.time);

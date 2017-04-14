@@ -1,18 +1,17 @@
 package main.com.valkryst.VcLSM;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import main.com.valkryst.VcLSM.node.Node;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class FileSearcher <V>{
+    private final ObjectMapper mapper = new ObjectMapper();
+    private List<Node> nodeList = new ArrayList<Node>();
     /**
      * Searches through all .dat files within the data directory for the first occurrence of a node using the specified
      * key.
@@ -34,6 +33,25 @@ public class FileSearcher <V>{
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Searches through all .dat files within the data directory for a specified time range from user
+     * key.
+     *
+     * @param beginning
+     *         The starting time
+     * @param ending
+     *         The ending time
+     *
+     * @return
+     *         a list contains found nodes
+     */
+    public List<Node> rangeSearchFile(final LocalDateTime beginning, final LocalDateTime ending){
+        for (final File file : getSortedFiles()) {
+            searchFileByTimestamp(beginning, ending, file);
+        }
+        return nodeList;
     }
 
     /** @return An array of all .dat files within the data folder, sorted from most to least recently created. */
@@ -67,17 +85,69 @@ public class FileSearcher <V>{
      *         The node, or nothing if no node is found.
      */
     private Optional<Node<V>> searchFile(final String key, final File file) {
-        try (
-            final InputStream is = new FileInputStream(file);
-        ) {
-            // todo Read the contents of the JSON file. If a node is found, then
-            // todo construct the Node object and return Optional.ofNullable(node).
-            // todo Else return Optional.empty().
+        try {
+            // Read the contents of the JSON file.
+            JsonNode rootNode = mapper.readTree(file);
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+            while(fields.hasNext()){
+                final Map.Entry<String, JsonNode> entry = fields.next();
+                // If a node is found, then
+                if(entry.getKey().contains(key)){
+                    JsonNode node = entry.getValue();
+                    LocalDateTime time = str2LocalDateTime(node.path(C.TIME).asText());
+                    // Construct the Node object and return Optional.ofNullable(node).
+                    Node nodeObj = new Node(node.path(C.K).asText(), (V)node.path(C.V).asText(), time);
+                    return Optional.ofNullable(nodeObj);
+                }
+            }
         } catch (final IOException e) {
-            final Logger logger = LogManager.getLogger();
-            logger.error(e.getMessage());
+            C.logger.error(e.getMessage());
         }
-
+        // Else return Optional.empty().
         return Optional.empty();
+    }
+
+    /**
+     * Searches a file in data directory for a specified time range from user
+     * key.
+     *
+     * @param start
+     *         The starting time
+     * @param end
+     *         The ending time
+     * @param file
+     *         The file to be searched
+     *
+     */
+    private void searchFileByTimestamp(final LocalDateTime start, final LocalDateTime end, final File file){
+        try{
+            JsonNode rootNode = mapper.readTree(file);
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+            while(fields.hasNext()){
+                final Map.Entry<String, JsonNode> entry = fields.next();
+                JsonNode nodeVal = entry.getValue();
+                String nodeTimeStampStr = nodeVal.path(C.TIME).asText();
+                LocalDateTime nodeTimeStamp = str2LocalDateTime(nodeTimeStampStr);
+                if(nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
+                    Node nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
+                    nodeList.add(nodeObj);
+                }
+            }
+        }catch(final IOException e){
+            C.logger.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Convert a formated datetime string to LocalDateTime type
+     *
+     * @param str
+     *         The plaint datatime string
+     *
+     * @return
+     *         The localDateTime type datetime
+     */
+    private LocalDateTime str2LocalDateTime(String str){
+        return LocalDateTime.parse(str, C.FORMATTER);
     }
 }
