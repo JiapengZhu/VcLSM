@@ -16,6 +16,20 @@ public class NodeInstrumentation {
      * @param inst
      *         Handle to instance of Instrumentation provided on command-line.
      */
+    public static void premain(final String args, final Instrumentation inst) {
+        instrumentation = inst;
+    }
+
+    /**
+     * Implementation of the overloaded premain method that is first invoked by
+     * the JVM during use of instrumentation.
+     *
+     * @param args
+     *         Agent options provided as a single String.
+     *
+     * @param inst
+     *         Handle to instance of Instrumentation provided on command-line.
+     */
     public static void agentmain(final String args, final Instrumentation inst) {
         instrumentation = inst;
     }

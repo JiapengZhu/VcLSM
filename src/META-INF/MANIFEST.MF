@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Premain-Class: main.com.valkryst.VcLSM.node.NodeInstrumentation
+Class-Path: log4j-api-2.5.jar jackson-databind-2.8.5.jar jackson-annot
+ ations-2.8.0.jar junit-4.12.jar jackson-core-2.8.5.jar hamcrest-core-
+ 1.3.jar log4j-core-2.5.jar
+
