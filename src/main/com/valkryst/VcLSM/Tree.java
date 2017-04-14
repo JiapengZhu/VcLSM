@@ -60,10 +60,16 @@ public class Tree <V> {
     /**
      * Puts the specified node into the tree.
      *
+     * If a null node is specified, then nothing happens.
+     *
      * @param node
      *         The node.
      */
     public void put(final Node<V> node) {
+        if (node == null) {
+            return;
+        }
+
         readLock.lock();
         final long estimatedNodeSize = NodeInstrumentation.getNodeSize(node);
 
