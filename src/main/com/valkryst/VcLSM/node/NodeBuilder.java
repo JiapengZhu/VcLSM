@@ -40,6 +40,12 @@ public class NodeBuilder <V> {
         if (value == null) {
             throw new IllegalStateException("A Node cannot have a null value.");
         }
+
+        if (value instanceof String) {
+            if (((String) value).isEmpty()) {
+                throw new IllegalStateException("A Node cannot have an empty value.");
+            }
+        }
     }
 
     public NodeBuilder<V> setKey(final String key) {
