@@ -159,7 +159,7 @@ public class Tree <V> {
             snapshotNodeList.addAll(nodeList);
         }
 
-        readLock.lock();
+        readLock.unlock();
 
         // delete the duplicated nodes
         writeLock.lock();
