@@ -35,7 +35,7 @@ public class FileMerger<V> {
      * Find files to be merged from disk, and then merge them
      *
      * @param maximumTreeSize
-     *         The maximum size of the tree, in kilobytes, before a Merge must occur.
+     *         The maximum size of the tree, in bytes, before a Merge must occur.
      *
      */
     public void merge(final int maximumTreeSize) {
@@ -192,10 +192,10 @@ public class FileMerger<V> {
      * Determines and returns all files within the data directory whose file-sizes are within the specified range.
      *
      * @param minLength
-     *         The minimum file-size, in kilobytes.
+     *         The minimum file-size, in bytes.
      *
      * @param maxLength
-     *         The maximum file-size, in kilobytes.
+     *         The maximum file-size, in bytes.
      *
      * @return
      *         A list of all files within the data directory whose file-sizes are within the specified range.
