@@ -59,6 +59,8 @@ public class FileMerger<V> {
             }
 
             // For each file in the list, merge the previous and current files.
+            iterator.next();
+
             while (iterator.hasNext()) {
                 final File previous = iterator.previous();
                 final File current = iterator.next();
@@ -216,7 +218,7 @@ public class FileMerger<V> {
         // For each file, if the file-size is within the specified range, then
         // add it to the list of valid files.
         for (final File file : allFiles) {
-            final long fileLength = file.length() / 1000;
+            final long fileLength = file.length();
 
             boolean isValid = fileLength >= minLength;
             isValid &= fileLength < maxLength;
