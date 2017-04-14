@@ -35,15 +35,15 @@ public class NodeInstrumentation {
     }
 
     /**
-     * Estimates the size of the specified node, in kilobytes.
+     * Estimates the size of the specified node, in bytes.
      *
      * @param node
      *         The node.
      *
      * @return
-     *         The estimated size of the node, in kilobytes.
+     *         The estimated size of the node, in bytes.
      */
     public static long getNodeSize(final Node node) {
-        return instrumentation.getObjectSize(node) / 1000;
+        return instrumentation.getObjectSize(node);
     }
 }
