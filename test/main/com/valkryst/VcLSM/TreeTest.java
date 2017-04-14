@@ -2,9 +2,13 @@ package main.com.valkryst.VcLSM;
 
 import main.com.valkryst.VcLSM.node.Node;
 import main.com.valkryst.VcLSM.node.NodeBuilder;
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 public class TreeTest {
@@ -15,7 +19,7 @@ public class TreeTest {
 
         tree.put(node);
 
-        final Optional<Node<String>> retrievedNode = tree.get(node.getKeyWithTimestamp());
+        final Optional<Node<String>> retrievedNode = tree.get(node.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(node, retrievedNode.get());
     }
@@ -66,7 +70,7 @@ public class TreeTest {
 
         tree.put(node);
 
-        final Optional<Node<String>> retrievedNode = tree.search(node.getKeyWithTimestamp());
+        final Optional<Node<String>> retrievedNode = tree.search(node.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(node, retrievedNode.get());
     }
@@ -83,8 +87,18 @@ public class TreeTest {
                                               .build());
         }
 
-        final Optional<Node<String>> retrievedNode = tree.search(nodeA.getKeyWithTimestamp());
+
+        final Optional<Node<String>> retrievedNode = tree.search(nodeA.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(nodeA, retrievedNode.get());
+    }
+
+    @AfterClass
+    public static void deleteDataDirectory() {
+        try {
+            FileUtils.deleteDirectory(new File("data/"));
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 }
