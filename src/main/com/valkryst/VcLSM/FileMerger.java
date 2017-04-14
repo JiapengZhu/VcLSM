@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -42,15 +41,20 @@ public class FileMerger<V> {
     public void merge(final int maximumTreeSize) {
         long minLength = 0;
         long maxLength = maximumTreeSize;
+        long totalFiles = getFilesInSizeRange(0, Long.MAX_VALUE).size();
 
-        while (maxLength > 0 && maxLength < Long.MAX_VALUE) {
+        while (maxLength > 0 && maxLength < Long.MAX_VALUE && totalFiles > 0) {
             final List<File> files = getFilesInSizeRange(minLength, maxLength);
             final ListIterator<File> iterator = files.listIterator();
+
+            totalFiles -= files.size();
 
             // Save computation time by only merging when there are at-least 4 files
             // within the list.
             // The value 4 is arbitrary.
             if (files.size() < 4) {
+                minLength += maximumTreeSize;
+                maxLength += maximumTreeSize;
                 continue;
             }
 
@@ -64,6 +68,7 @@ public class FileMerger<V> {
                     iterator.remove();
                 }
             }
+
             minLength += maximumTreeSize;
             maxLength += maximumTreeSize;
         }

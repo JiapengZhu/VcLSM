@@ -76,7 +76,6 @@ public class Tree <V> {
             return;
         }
 
-        readLock.lock();
         final long estimatedNodeSize = NodeInstrumentation.getNodeSize(node);
 
         // If the tree will exceed it's maximum size by adding the new node,
@@ -87,7 +86,6 @@ public class Tree <V> {
 
         map.put(node.getKeyWithTimestamp(), node);
         currentSize += estimatedNodeSize;
-        readLock.unlock();
     }
 
     /**
@@ -126,6 +124,7 @@ public class Tree <V> {
         final ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
         map.clear();
+        currentSize = 0;
         writeLock.unlock();
 
         // Merge:
