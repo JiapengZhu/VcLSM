@@ -56,6 +56,10 @@ public class Tree <V> {
      *         The found node.
      */
     public Optional<Node<V>> get(final String key) {
+        if (key == null || key.isEmpty()) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(map.get(key));
     }
 
