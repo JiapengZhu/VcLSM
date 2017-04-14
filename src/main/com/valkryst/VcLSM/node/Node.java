@@ -37,6 +37,21 @@ public class Node <V> implements Comparable<Node<V>> {
         return this.time.compareTo(other.time);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof Node) {
+            final Node<V> otherNode = (Node<V>) obj;
+
+            boolean isEqual = key.equals(otherNode.getKey());
+            isEqual &= time.equals(otherNode.getTime());
+            isEqual &= value.equals(otherNode.getValue());
+
+            return isEqual;
+        } else {
+            return false;
+        }
+    }
+
     /** @return The key concatenated with the timestamp. */
     public String getKeyWithTimestamp(){
         return key + C.DILIMETER + time;
