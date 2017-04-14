@@ -57,7 +57,7 @@ public class FileSearcher <V> {
     /** @return An array of all .dat files within the data folder, sorted from most to least recently created. */
     private File[] getSortedFiles() {
         // Retrieve all files in the data folder that end with the ".dat" extension:
-        final File[] files = new File("/data/").listFiles(pathname -> {
+        final File[] files = new File("data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
             accept &= pathname.isFile();
 
