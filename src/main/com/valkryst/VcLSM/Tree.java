@@ -199,4 +199,9 @@ public class Tree <V> {
             counter++;
         }
     }
+
+    /** @return The total number of nodes in the tree. */
+    public int getTotalNodes() {
+        return map.size();
+    }
 }
