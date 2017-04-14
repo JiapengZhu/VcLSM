@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -23,6 +23,8 @@ public class Tree <V> {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
+    private final FileSearcher<V> fileSearcher = new FileSearcher<>();
+    private List<Node> snapshotNodeList = new ArrayList<Node>();
 
 
     /**
@@ -96,7 +98,6 @@ public class Tree <V> {
         }
 
         // Search each of the on-disk files
-        final FileSearcher<V> fileSearcher = new FileSearcher<>();
         result = fileSearcher.search(key);
 
         return result;
@@ -108,7 +109,7 @@ public class Tree <V> {
 
         // Create a new in-memory map, this is immutable and will be merged onto disk.
         // The old in-memory map will is mutable and will be reused.
-        final ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<String, Node<V>> ();
+        ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<String, Node<V>> ();
         newMap.putAll(map);
         map.clear();
         writeLock.unlock();
@@ -133,11 +134,53 @@ public class Tree <V> {
 
         // After mMerge:
         writeLock.lock();
-        newMap.clear();
+        newMap = null;
         writeLock.unlock();
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
         // todo Implement snapshot.
+        readLock.lock();
+        // Search nodes within specified time range from memory component
+        for (Map.Entry<String, Node<V>> entry : map.entrySet()){
+            Node<V> node = entry.getValue();
+            LocalDateTime nodeTimestamp = node.getTime();
+            if(nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)){
+                snapshotNodeList.add(node);
+            }
+        }
+        // Search nodes within specified time range from disks
+        List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
+        if(nodeList.size() > 0)
+            snapshotNodeList.addAll(nodeList);
+        readLock.lock();
+        // delete the duplicated nodes
+        writeLock.lock();
+        refineSnapshotNode();
+        writeLock.unlock();
     }
+
+    // Once the search is done, delete the duplicated nodes to keep latest node version
+    private void refineSnapshotNode(){
+        Set<String> detectionSet = new HashSet<String>();
+        ArrayList<Node> oldNodeList = new ArrayList<Node>();
+        int counter = 0;
+        for(Node node : snapshotNodeList){
+            String key = node.getKey();
+            if(!detectionSet.add(key)){
+                Node oldNode = oldNodeList.get(counter - 1);
+                LocalDateTime nodeTimestamp = node.getTime();
+                LocalDateTime oldNodeTimestamp = oldNode.getTime();
+                if(oldNodeTimestamp.isBefore(nodeTimestamp)){
+                    snapshotNodeList.remove(oldNode);
+                }else{
+                    snapshotNodeList.remove(node);
+                }
+            }else{
+                oldNodeList.add(node);
+            }
+            counter++;
+        }
+    }
+
 }
