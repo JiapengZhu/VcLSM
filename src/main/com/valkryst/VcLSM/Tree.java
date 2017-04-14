@@ -100,6 +100,10 @@ public class Tree <V> {
      *         The found node.
      */
     public Optional<Node<V>> search(final String key) {
+        if (key == null || key.isEmpty()) {
+            return Optional.empty();
+        }
+
         // Search the in-memory map:
         Optional<Node<V>> result = get(key);
 
