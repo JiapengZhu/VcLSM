@@ -140,21 +140,26 @@ public class Tree <V> {
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
-        // todo Implement snapshot.
         readLock.lock();
+
         // Search nodes within specified time range from memory component
-        for (Map.Entry<String, Node<V>> entry : map.entrySet()){
+        for (final Map.Entry<String, Node<V>> entry : map.entrySet()){
             Node<V> node = entry.getValue();
             LocalDateTime nodeTimestamp = node.getTime();
             if(nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)){
                 snapshotNodeList.add(node);
             }
         }
+
         // Search nodes within specified time range from disks
-        List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
-        if(nodeList.size() > 0)
+        final List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
+
+        if(nodeList.size() > 0) {
             snapshotNodeList.addAll(nodeList);
+        }
+
         readLock.lock();
+
         // delete the duplicated nodes
         writeLock.lock();
         refineSnapshotNode();
@@ -163,25 +168,26 @@ public class Tree <V> {
 
     // Once the search is done, delete the duplicated nodes to keep latest node version
     private void refineSnapshotNode(){
-        Set<String> detectionSet = new HashSet<String>();
-        ArrayList<Node> oldNodeList = new ArrayList<Node>();
+        final Set<String> detectionSet = new HashSet<>();
+        final ArrayList<Node> oldNodeList = new ArrayList<>();
         int counter = 0;
-        for(Node node : snapshotNodeList){
-            String key = node.getKey();
-            if(!detectionSet.add(key)){
-                Node oldNode = oldNodeList.get(counter - 1);
-                LocalDateTime nodeTimestamp = node.getTime();
-                LocalDateTime oldNodeTimestamp = oldNode.getTime();
-                if(oldNodeTimestamp.isBefore(nodeTimestamp)){
+
+        for (final Node node : snapshotNodeList) {
+            if(!detectionSet.add(node.getKey())) {
+                final Node oldNode = oldNodeList.get(counter - 1);
+                final LocalDateTime nodeTimestamp = node.getTime();
+                final LocalDateTime oldNodeTimestamp = oldNode.getTime();
+
+                if (oldNodeTimestamp.isBefore(nodeTimestamp)) {
                     snapshotNodeList.remove(oldNode);
-                }else{
+                } else {
                     snapshotNodeList.remove(node);
                 }
-            }else{
+            } else {
                 oldNodeList.add(node);
             }
+
             counter++;
         }
     }
-
 }
