@@ -26,7 +26,7 @@ public class FileMerger<V> {
         if (! dataDirectory.exists()) {
             if (dataDirectory.mkdir()) {
                 logger.error("Unable to create data directory.");
-                System.exit(1); // todo Maybe attempt to create the directory a different way before exiting.
+                // todo Maybe exit the program?
             }
         }
     }
