@@ -21,7 +21,7 @@ public class FileMerger<V> {
     /** Constructs a new FileMerger. */
     public FileMerger() {
         // If the data directory doesn't exist, attempt to create it:
-        final File dataDirectory = new File("/data/");
+        final File dataDirectory = new File("data/");
 
         if (! dataDirectory.exists()) {
             if (dataDirectory.mkdir()) {
@@ -84,7 +84,7 @@ public class FileMerger<V> {
      *         The output file name.
      */
     public void mergeToDisk(ConcurrentSkipListMap<String, Node<V>> map, String fileName) throws IOException{
-        mapper.writeValue(new File("/data/"+fileName), map);
+        mapper.writeValue(new File("data/"+fileName), map);
     }
 
     /**
@@ -200,7 +200,7 @@ public class FileMerger<V> {
      */
     private List<File> getFilesInSizeRange(final long minLength, final long maxLength) {
         // Retrieve all files in the data folder that end with the ".dat" extension:
-        final File[] allFiles = new File("/data/").listFiles(pathname -> {
+        final File[] allFiles = new File("data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
             accept &= pathname.isFile();
 
