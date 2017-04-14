@@ -24,7 +24,7 @@ public class FileMerger<V> {
         final File dataDirectory = new File("data/");
 
         if (! dataDirectory.exists()) {
-            if (dataDirectory.mkdir()) {
+            if (! dataDirectory.mkdir()) {
                 logger.error("Unable to create data directory.");
                 // todo Maybe exit the program?
             }
