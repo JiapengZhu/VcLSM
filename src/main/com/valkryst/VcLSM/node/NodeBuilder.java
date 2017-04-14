@@ -17,7 +17,7 @@ public class NodeBuilder <V> {
      * @throws IllegalStateException
      *          If something is wrong with the builder's state.
      */
-    public Node build() throws IllegalStateException {
+    public Node<V> build() throws IllegalStateException {
         checkState();
         return new Node<>(this);
     }
