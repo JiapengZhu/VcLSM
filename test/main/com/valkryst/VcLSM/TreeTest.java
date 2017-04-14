@@ -15,7 +15,7 @@ public class TreeTest {
 
         tree.put(node);
 
-        final Optional<Node<String>> retrievedNode = tree.get("Node Key");
+        final Optional<Node<String>> retrievedNode = tree.get(node.getKeyWithTimestamp());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(node, retrievedNode.get());
     }
@@ -45,6 +45,8 @@ public class TreeTest {
         final Node<String> node = new NodeBuilder<String>().setKey("Node Key").setValue("Node Value").build();
 
         tree.put(node);
+
+        Assert.assertEquals(tree.getTotalNodes(), 1);
     }
 
     @Test
@@ -53,5 +55,36 @@ public class TreeTest {
         final Node<String> node = null;
 
         tree.put(node);
+
+        Assert.assertEquals(tree.getTotalNodes(), 0);
+    }
+
+    @Test
+    public void searchForExistingNodeInMemory() {
+        final Tree<String> tree = new Tree<>(1000);
+        final Node<String> node = new NodeBuilder<String>().setKey("Node Key").setValue("Node Value").build();
+
+        tree.put(node);
+
+        final Optional<Node<String>> retrievedNode = tree.search(node.getKeyWithTimestamp());
+        Assert.assertTrue(retrievedNode.isPresent());
+        Assert.assertEquals(node, retrievedNode.get());
+    }
+
+    @Test
+    public void searchForExistingNodeOnDisk() {
+        final Tree<String> tree = new Tree<>(1);
+        final Node<String> nodeA = new NodeBuilder<String>().setKey("Node Key").setValue("Node Value").build();
+
+        for (int i = 0 ; i < 1000 ; i++) {
+            final String tempKeyValue = String.valueOf(i);
+            tree.put(new NodeBuilder<String>().setKey(tempKeyValue)
+                                              .setValue(tempKeyValue)
+                                              .build());
+        }
+
+        final Optional<Node<String>> retrievedNode = tree.search(nodeA.getKeyWithTimestamp());
+        Assert.assertTrue(retrievedNode.isPresent());
+        Assert.assertEquals(nodeA, retrievedNode.get());
     }
 }
