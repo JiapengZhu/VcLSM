@@ -115,7 +115,7 @@ public class Tree <V> {
 
         // Create a new in-memory map, this is immutable and will be merged onto disk.
         // The old in-memory map will is mutable and will be reused.
-        ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<String, Node<V>> ();
+        ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
         map.clear();
         writeLock.unlock();
@@ -137,11 +137,6 @@ public class Tree <V> {
         } finally {
             writeLock.unlock();
         }
-
-        // After mMerge:
-        writeLock.lock();
-        newMap = null;
-        writeLock.unlock();
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
