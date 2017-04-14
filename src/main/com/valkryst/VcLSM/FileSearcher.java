@@ -11,7 +11,8 @@ import java.util.*;
 
 public class FileSearcher <V> {
     private final ObjectMapper mapper = new ObjectMapper();
-    private List<Node> nodeList = new ArrayList<Node>();
+    private List<Node> nodeList = new ArrayList<>();
+
     /**
      * Searches through all .dat files within the data directory for the first occurrence of a node using the specified
      * key.
