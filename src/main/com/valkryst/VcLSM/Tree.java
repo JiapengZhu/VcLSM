@@ -60,7 +60,15 @@ public class Tree <V> {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(map.get(key));
+        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
+            final String nodeKey = entry.getValue().getKey();
+
+            if (nodeKey.equals(key)) {
+                return Optional.of(entry.getValue());
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -103,12 +111,10 @@ public class Tree <V> {
         }
 
         // Search the in-memory map:
-        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
-            final String nodeKey = entry.getValue().getKey();
+        Optional<Node<V>> tmp = get(key);
 
-            if (nodeKey.equals(key)) {
-                return Optional.of(entry.getValue());
-            }
+        if (tmp.isPresent()) {
+            return tmp;
         }
 
         // Search each of the on-disk files
