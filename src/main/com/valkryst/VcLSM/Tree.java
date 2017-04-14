@@ -115,7 +115,7 @@ public class Tree <V> {
 
         // Create a new in-memory map, this is immutable and will be merged onto disk.
         // The old in-memory map will is mutable and will be reused.
-        ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<> ();
+        final ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
         map.clear();
         writeLock.unlock();
@@ -143,10 +143,11 @@ public class Tree <V> {
         readLock.lock();
 
         // Search nodes within specified time range from memory component
-        for (final Map.Entry<String, Node<V>> entry : map.entrySet()){
-            Node<V> node = entry.getValue();
-            LocalDateTime nodeTimestamp = node.getTime();
-            if(nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)){
+        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
+            final Node<V> node = entry.getValue();
+            final LocalDateTime nodeTimestamp = node.getTime();
+
+            if (nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)) {
                 snapshotNodeList.add(node);
             }
         }
@@ -154,7 +155,7 @@ public class Tree <V> {
         // Search nodes within specified time range from disks
         final List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
 
-        if(nodeList.size() > 0) {
+        if (nodeList.size() > 0) {
             snapshotNodeList.addAll(nodeList);
         }
 
@@ -173,7 +174,7 @@ public class Tree <V> {
         int counter = 0;
 
         for (final Node node : snapshotNodeList) {
-            if(!detectionSet.add(node.getKey())) {
+            if (!detectionSet.add(node.getKey())) {
                 final Node oldNode = oldNodeList.get(counter - 1);
                 final LocalDateTime nodeTimestamp = node.getTime();
                 final LocalDateTime oldNodeTimestamp = oldNode.getTime();
