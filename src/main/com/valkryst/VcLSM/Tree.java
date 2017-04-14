@@ -14,9 +14,9 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Tree <V> {
-    /** The maximum size of the tree, in kilobytes, before a Merge must occur. */
+    /** The maximum size of the tree, in bytes, before a Merge must occur. */
     private final int maximumSize;
-    /** The current size of the tree, in kilobytes. */
+    /** The current size of the tree, in bytes. */
     private int currentSize = 0;
     /** The underlying data structure of the tree. */
     private final ConcurrentSkipListMap<String, Node<V>> map = new ConcurrentSkipListMap<>();
@@ -38,9 +38,9 @@ public class Tree <V> {
             final Logger logger = LogManager.getLogger();
             logger.error("The maximumSize of a Tree cannot be less than 1 kilobyte.");
 
-            this.maximumSize = 1;
+            this.maximumSize = 1000; // 1 Kilobyte
         } else {
-            this.maximumSize = maximumSize;
+            this.maximumSize = maximumSize * 1000; // 1000 bytes = 1 kilobyte
         }
     }
 
