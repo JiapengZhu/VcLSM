@@ -103,16 +103,16 @@ public class Tree <V> {
         }
 
         // Search the in-memory map:
-        Optional<Node<V>> result = get(key);
+        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
+            final String nodeKey = entry.getValue().getKey();
 
-        if (result.isPresent()) {
-            return result;
+            if (nodeKey.equals(key)) {
+                return Optional.of(entry.getValue());
+            }
         }
 
         // Search each of the on-disk files
-        result = fileSearcher.search(key);
-
-        return result;
+        return fileSearcher.search(key);
     }
 
     public void merge() {
