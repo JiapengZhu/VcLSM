@@ -159,7 +159,7 @@ public class Tree <V> {
         List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
         if(nodeList.size() > 0)
             snapshotNodeList.addAll(nodeList);
-        readLock.lock();
+        readLock.unlock();
         // delete the duplicated nodes
         writeLock.lock();
         refineSnapshotNode();
