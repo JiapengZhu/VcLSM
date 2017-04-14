@@ -137,7 +137,7 @@ public class Tree <V> {
         try {
             writeLock.lock();
             final FileMerger<V> fileMerger = new FileMerger<>();
-            final String fileName = System.currentTimeMillis() + ".json";
+            final String fileName = System.currentTimeMillis() + ".dat";
 
             // Merge in-memory data into disk
             fileMerger.mergeToDisk(newMap, fileName);
