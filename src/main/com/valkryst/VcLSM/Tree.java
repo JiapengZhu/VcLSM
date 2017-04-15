@@ -121,7 +121,7 @@ public class Tree <V> {
         return fileSearcher.search(key);
     }
 
-    public void merge() {
+    private void merge() {
         // Before Merge:
         writeLock.lock();
 
