@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -22,12 +21,12 @@ public class FileMerger<V> {
     /** Constructs a new FileMerger. */
     public FileMerger() {
         // If the data directory doesn't exist, attempt to create it:
-        final File dataDirectory = new File("/data/");
+        final File dataDirectory = new File("data/");
 
         if (! dataDirectory.exists()) {
-            if (dataDirectory.mkdir()) {
+            if (! dataDirectory.mkdir()) {
                 logger.error("Unable to create data directory.");
-                System.exit(1); // todo Maybe attempt to create the directory a different way before exiting.
+                // todo Maybe exit the program?
             }
         }
     }
@@ -36,25 +35,32 @@ public class FileMerger<V> {
      * Find files to be merged from disk, and then merge them
      *
      * @param maximumTreeSize
-     *         The maximum size of the tree, in kilobytes, before a Merge must occur.
+     *         The maximum size of the tree, in bytes, before a Merge must occur.
      *
      */
     public void merge(final int maximumTreeSize) {
         long minLength = 0;
         long maxLength = maximumTreeSize;
+        long totalFiles = getFilesInSizeRange(0, Long.MAX_VALUE).size();
 
-        while (maxLength > 0 && maxLength < Long.MAX_VALUE) {
+        while (maxLength > 0 && maxLength < Long.MAX_VALUE && totalFiles > 0) {
             final List<File> files = getFilesInSizeRange(minLength, maxLength);
             final ListIterator<File> iterator = files.listIterator();
+
+            totalFiles -= files.size();
 
             // Save computation time by only merging when there are at-least 4 files
             // within the list.
             // The value 4 is arbitrary.
             if (files.size() < 4) {
+                minLength += maximumTreeSize;
+                maxLength += maximumTreeSize;
                 continue;
             }
 
             // For each file in the list, merge the previous and current files.
+            iterator.next();
+
             while (iterator.hasNext()) {
                 final File previous = iterator.previous();
                 final File current = iterator.next();
@@ -64,6 +70,7 @@ public class FileMerger<V> {
                     iterator.remove();
                 }
             }
+
             minLength += maximumTreeSize;
             maxLength += maximumTreeSize;
         }
@@ -79,7 +86,7 @@ public class FileMerger<V> {
      *         The output file name.
      */
     public void mergeToDisk(ConcurrentSkipListMap<String, Node<V>> map, String fileName) throws IOException{
-        mapper.writeValue(new File("/data/"+fileName), map);
+        mapper.writeValue(new File("data/"+fileName), map);
     }
 
     /**
@@ -185,17 +192,17 @@ public class FileMerger<V> {
      * Determines and returns all files within the data directory whose file-sizes are within the specified range.
      *
      * @param minLength
-     *         The minimum file-size, in kilobytes.
+     *         The minimum file-size, in bytes.
      *
      * @param maxLength
-     *         The maximum file-size, in kilobytes.
+     *         The maximum file-size, in bytes.
      *
      * @return
      *         A list of all files within the data directory whose file-sizes are within the specified range.
      */
     private List<File> getFilesInSizeRange(final long minLength, final long maxLength) {
         // Retrieve all files in the data folder that end with the ".dat" extension:
-        final File[] allFiles = new File("/data/").listFiles(pathname -> {
+        final File[] allFiles = new File("data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
             accept &= pathname.isFile();
 
@@ -211,7 +218,7 @@ public class FileMerger<V> {
         // For each file, if the file-size is within the specified range, then
         // add it to the list of valid files.
         for (final File file : allFiles) {
-            final long fileLength = file.length() / 1000;
+            final long fileLength = file.length();
 
             boolean isValid = fileLength >= minLength;
             isValid &= fileLength < maxLength;

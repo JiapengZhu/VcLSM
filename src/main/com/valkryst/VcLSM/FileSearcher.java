@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class FileSearcher <V>{
+public class FileSearcher <V> {
     private final ObjectMapper mapper = new ObjectMapper();
-    private List<Node> nodeList = new ArrayList<Node>();
+    private List<Node> nodeList = new ArrayList<>();
+
     /**
      * Searches through all .dat files within the data directory for the first occurrence of a node using the specified
      * key.
@@ -57,7 +58,7 @@ public class FileSearcher <V>{
     /** @return An array of all .dat files within the data folder, sorted from most to least recently created. */
     private File[] getSortedFiles() {
         // Retrieve all files in the data folder that end with the ".dat" extension:
-        final File[] files = new File("/data/").listFiles(pathname -> {
+        final File[] files = new File("data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
             accept &= pathname.isFile();
 
@@ -87,23 +88,25 @@ public class FileSearcher <V>{
     private Optional<Node<V>> searchFile(final String key, final File file) {
         try {
             // Read the contents of the JSON file.
-            JsonNode rootNode = mapper.readTree(file);
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+            final JsonNode rootNode = mapper.readTree(file);
+            final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+
             while(fields.hasNext()){
                 final Map.Entry<String, JsonNode> entry = fields.next();
-                // If a node is found, then
+
                 if(entry.getKey().contains(key)){
-                    JsonNode node = entry.getValue();
-                    LocalDateTime time = str2LocalDateTime(node.path(C.TIME).asText());
-                    // Construct the Node object and return Optional.ofNullable(node).
-                    Node nodeObj = new Node(node.path(C.K).asText(), (V)node.path(C.V).asText(), time);
-                    return Optional.ofNullable(nodeObj);
+                    final JsonNode jsonNode = entry.getValue();
+                    final LocalDateTime time = stringToLocalDateTime(jsonNode.path(C.TIME).asText());
+
+                    // Construct and return the node:
+                    final Node<V> node = new Node(key, jsonNode.path(C.V).asText(), time);
+                    return Optional.of(node);
                 }
             }
         } catch (final IOException e) {
             C.logger.error(e.getMessage());
         }
-        // Else return Optional.empty().
+
         return Optional.empty();
     }
 
@@ -121,19 +124,21 @@ public class FileSearcher <V>{
      */
     private void searchFileByTimestamp(final LocalDateTime start, final LocalDateTime end, final File file){
         try{
-            JsonNode rootNode = mapper.readTree(file);
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+            final JsonNode rootNode = mapper.readTree(file);
+            final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+
             while(fields.hasNext()){
                 final Map.Entry<String, JsonNode> entry = fields.next();
-                JsonNode nodeVal = entry.getValue();
-                String nodeTimeStampStr = nodeVal.path(C.TIME).asText();
-                LocalDateTime nodeTimeStamp = str2LocalDateTime(nodeTimeStampStr);
-                if(nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
-                    Node nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
+                final JsonNode nodeVal = entry.getValue();
+                final String nodeTimeStampStr = nodeVal.path(C.TIME).asText();
+                final LocalDateTime nodeTimeStamp = stringToLocalDateTime(nodeTimeStampStr);
+
+                if (nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
+                    final Node<V> nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
                     nodeList.add(nodeObj);
                 }
             }
-        }catch(final IOException e){
+        } catch(final IOException e) {
             C.logger.error(e.getMessage());
         }
     }
@@ -147,7 +152,7 @@ public class FileSearcher <V>{
      * @return
      *         The localDateTime type datetime
      */
-    private LocalDateTime str2LocalDateTime(String str){
+    private LocalDateTime stringToLocalDateTime(String str){
         return LocalDateTime.parse(str, C.FORMATTER);
     }
 }
