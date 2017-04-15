@@ -21,7 +21,7 @@ public class Node <V> implements Comparable<Node<V>> {
      */
     public Node(final NodeBuilder<V> builder) {
         key = builder.getKey();
-        time = LocalDateTime.now();
+        time = builder.getTime();
         value = builder.getValue();
     }
 
