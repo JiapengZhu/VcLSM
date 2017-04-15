@@ -97,13 +97,9 @@ public class FileSearcher {
 
                 if(entry.getValue().get("key").asText().equals(key)) {
                     final JsonNode jsonNode = entry.getValue();
-                    final LocalDateTime time = stringToLocalDateTime(jsonNode.path(C.TIME).asText());
 
                     // Construct and return the node:
-                    final Node node = new NodeBuilder().setKey(key)
-                                                       .setValue(jsonNode.path(C.V).asText())
-                                                       .setTime(time)
-                                                       .build();
+                    final Node node = new NodeBuilder().loadFromJSON(jsonNode).build();
                     return Optional.of(node);
                 }
             }
@@ -118,15 +114,17 @@ public class FileSearcher {
      * Searches a file in data directory for a specified time range from user
      * key.
      *
-     * @param start
-     *         The starting time
-     * @param end
-     *         The ending time
+     * @param beginning
+     *         The beginning time.
+     *
+     * @param ending
+     *         The ending time.
+     *
      * @param file
-     *         The file to be searched
+     *         The file to be searched.
      *
      */
-    private void searchFileByTimestamp(final LocalDateTime start, final LocalDateTime end, final File file){
+    private void searchFileByTimestamp(final LocalDateTime beginning, final LocalDateTime ending, final File file){
         try{
             final JsonNode rootNode = mapper.readTree(file);
             final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
@@ -134,14 +132,19 @@ public class FileSearcher {
             while(fields.hasNext()){
                 final Map.Entry<String, JsonNode> entry = fields.next();
                 final JsonNode nodeVal = entry.getValue();
-                final String nodeTimeStampStr = nodeVal.path(C.TIME).asText();
-                final LocalDateTime nodeTimeStamp = stringToLocalDateTime(nodeTimeStampStr);
 
-                if (nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
-                    final Node nodeObj = new NodeBuilder().setKey(nodeVal.path(C.K).asText())
-                                                         .setValue(nodeVal.path(C.V).asText())
-                                                         .setTime(nodeTimeStamp)
-                                                         .build();
+                // Determine if Node is within specified time-range:
+                final LocalDateTime nodeTimestamp = stringToLocalDateTime(nodeVal.path("time").asText());
+
+                boolean isBeginningOrAfter = nodeTimestamp.isAfter(beginning);
+                isBeginningOrAfter |= nodeTimestamp.isEqual(beginning);
+
+                boolean isEndingOrBefore = nodeTimestamp.isBefore(ending);
+                isEndingOrBefore |= nodeTimestamp.isEqual(ending);
+
+                // Construct and add the Node if it's within the time-range:
+                if (isBeginningOrAfter && isEndingOrBefore) {
+                    final Node nodeObj = new NodeBuilder().loadFromJSON(nodeVal).build();
                     nodeList.add(nodeObj);
                 }
             }
