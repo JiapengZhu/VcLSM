@@ -1,9 +1,15 @@
 package main.com.valkryst.VcLSM;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import main.com.valkryst.VcLSM.node.Node;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -23,10 +30,18 @@ public class FileMerger<V> {
         // If the data directory doesn't exist, attempt to create it:
         final File dataDirectory = new File("data/");
 
+        // Handle the deserialized date time format issue
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(C.FORMATTER));
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.registerModule(javaTimeModule);
+
         if (! dataDirectory.exists()) {
+
             if (! dataDirectory.mkdir()) {
                 logger.error("Unable to create data directory.");
                 // todo Maybe exit the program?
+                System.exit(1);
             }
         }
     }
@@ -100,6 +115,7 @@ public class FileMerger<V> {
      * @param fileB
      *         The second file.
      */
+
     private void mergeFiles(final File fileA, final File fileB) {
         final Set<String> s = new HashSet<>();
         final JsonNode rootNodeA, rootNodeB;
@@ -132,7 +148,7 @@ public class FileMerger<V> {
                     // if to-be merged data is later than merging data, update the merging data
                     final String bTime = bJsonNodeVal.path(C.TIME).asText();
                     final String aTime = objArrNodeA.get(i).path(C.TIME).asText();
-
+                  // System.out.println(bJsonNodeVal.path(C.TIME) + "\t" + bJsonNodeVal.path(C.TIME).asText().length());
                     if (isDateTimeBefore(aTime, bTime)) {
                         final String aNewKey = objArrNodeA.get(i).path(C.K).asText() + "+" + bTime;
                         aObjNodes.remove(keyArrNodeA.get(i).asText());
@@ -182,9 +198,6 @@ public class FileMerger<V> {
                 logger.error("Fail to delete " + fileB.getName());
                 System.exit(1);
             }
-
-           // System.out.println(aObjNodes);
-
         } catch (final IOException e) {
             logger.error(e.getMessage());
         }
@@ -234,7 +247,14 @@ public class FileMerger<V> {
         return validFiles;
     }
 
-    private static boolean isDateTimeBefore(final String timeA, final String timeB){
+    private static boolean isDateTimeBefore(String timeA, String timeB){
+        while (timeA.length() != 23){
+            timeA = timeA + "0";
+        }
+        while(timeB.length() != 23){
+            timeB = timeB + "0";
+        }
+
         final LocalDateTime aLocalTime = LocalDateTime.parse(timeA, C.FORMATTER);
         final LocalDateTime bLocalTime = LocalDateTime.parse(timeB, C.FORMATTER);
         return aLocalTime.isBefore(bLocalTime);
