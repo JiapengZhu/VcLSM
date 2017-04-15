@@ -21,7 +21,6 @@ public class Tree <V> {
     /** The underlying data structure of the tree. */
     private final ConcurrentSkipListMap<String, Node<V>> map = new ConcurrentSkipListMap<>();
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
     private final FileSearcher<V> fileSearcher = new FileSearcher<>();
 
