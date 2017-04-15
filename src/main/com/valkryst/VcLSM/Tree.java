@@ -161,7 +161,13 @@ public class Tree {
         map.forEach((key, node) -> {
             final LocalDateTime nodeTimestamp = node.getTime();
 
-            if (nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)) {
+            boolean isBeginningOrAfter = nodeTimestamp.isAfter(beginning);
+            isBeginningOrAfter |= nodeTimestamp.isEqual(beginning);
+
+            boolean isEndingOrBefore = nodeTimestamp.isBefore(ending);
+            isEndingOrBefore |= nodeTimestamp.isEqual(ending);
+
+            if (isBeginningOrAfter && isEndingOrBefore) {
                 snapshotNodeList.add(node);
             }
         });
@@ -170,23 +176,22 @@ public class Tree {
         snapshotNodeList.addAll(fileSearcher.rangeSearchFile(beginning, ending));
 
         // Delete duplicated nodes:
-        final ListIterator<Node> iteratorOuter = snapshotNodeList.listIterator();
+        final ListIterator<Node> it = snapshotNodeList.listIterator();
 
-        while (iteratorOuter.hasNext()) {
-            final Node outerNode = iteratorOuter.next();
-            final ListIterator<Node> iteratorInner = snapshotNodeList.listIterator();
+        while (it.hasNext()) {
+            final Node outerNode = it.next();
 
-            while (iteratorInner.hasNext()) {
-                final Node innerNode = iteratorInner.next();
+            while (it.hasNext()) {
+                final Node innerNode = it.next();
                 boolean keysEqual = outerNode.getKey().equals(innerNode.getKey());
 
                 if (keysEqual) {
                     boolean outerIsOlder = outerNode.getTime().isBefore(innerNode.getTime());
 
                     if (outerIsOlder) {
-                        iteratorOuter.remove();
+                        it.remove();
                     } else {
-                        iteratorInner.remove();
+                        it.remove();
                     }
                 }
             }

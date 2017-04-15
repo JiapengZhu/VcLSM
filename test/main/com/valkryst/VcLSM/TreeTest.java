@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public class TreeTest {
@@ -112,6 +113,99 @@ public class TreeTest {
     public void snapshotWithNullBeginningAndEndingTime() {
         final Tree tree = new Tree(1);
         tree.snapshot(null, null);
+    }
+
+    @Test
+    public void getSnapshotWithOneUniqueReturnableNodeInMemory() {
+        final Tree tree = new Tree(100000);
+
+        final LocalDateTime beginningTime = LocalDateTime.now();
+        final LocalDateTime endingTime = LocalDateTime.MAX;
+
+        final Node nodeA = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
+
+        tree.put(nodeA);
+        tree.put(nodeB);
+
+        final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
+        Assert.assertEquals(snapshot.size(), 1);
+    }
+
+    @Test
+    public void getSnapshotWithTwoUniqueReturnableNodesInMemory() {
+        final Tree tree = new Tree(100000);
+
+        final LocalDateTime beforeStartTime = LocalDateTime.MIN;
+        final LocalDateTime beginningTime = LocalDateTime.now();
+        final LocalDateTime endingTime = LocalDateTime.MAX;
+
+        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beforeStartTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(beginningTime).setValue("Node Value").build();
+
+        tree.put(nodeA);
+        tree.put(nodeB);
+
+        final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
+        Assert.assertEquals(snapshot.size(), 2);
+    }
+
+    @Test
+    public void getSnapshotWithOneUniqueReturnableNodeOnDisk() {
+        final Tree tree = new Tree(1);
+
+        final LocalDateTime beforeStartTime = LocalDateTime.MIN;
+        final LocalDateTime beginningTime = LocalDateTime.now();
+        final LocalDateTime endingTime = LocalDateTime.MAX;
+
+        final Node nodeA = new NodeBuilder().setKey("Node Key").setTime(beforeStartTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key").setTime(beforeStartTime).setValue("Node Value").build();
+        final Node nodeC = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeD = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
+
+        tree.put(nodeA);
+        tree.put(nodeB);
+        tree.put(nodeC);
+        tree.put(nodeD);
+
+        // Fill the tree with 1000 random nodes to ensure our first 4 nodes are
+        // merged to disk before doing a snapshot:
+        for (int i = 0 ; i < 1000 ; i++) {
+            final String tempKeyValue = String.valueOf(i);
+            tree.put(new NodeBuilder().setKey(tempKeyValue)
+                    .setValue(tempKeyValue)
+                    .build());
+        }
+
+        final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
+        Assert.assertEquals(snapshot.size(), 1);
+    }
+
+    @Test
+    public void getSnapshotWithTwoUniqueReturnableNodesOnDisk() {
+        final Tree tree = new Tree(1);
+
+        final LocalDateTime beforeStartTime = LocalDateTime.MIN;
+        final LocalDateTime beginningTime = LocalDateTime.now();
+        final LocalDateTime endingTime = LocalDateTime.MAX;
+
+        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beforeStartTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(beginningTime).setValue("Node Value").build();
+
+        tree.put(nodeA);
+        tree.put(nodeB);
+
+        // Fill the tree with 1000 random nodes to ensure our first 4 nodes are
+        // merged to disk before doing a snapshot:
+        for (int i = 0 ; i < 1000 ; i++) {
+            final String tempKeyValue = String.valueOf(i);
+            tree.put(new NodeBuilder().setKey(tempKeyValue)
+                    .setValue(tempKeyValue)
+                    .build());
+        }
+
+        final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
+        Assert.assertEquals(snapshot.size(), 2);
     }
 
     @Test
