@@ -134,7 +134,7 @@ public class FileSearcher {
                 final JsonNode nodeVal = entry.getValue();
 
                 // Determine if Node is within specified time-range:
-                final LocalDateTime nodeTimestamp = stringToLocalDateTime(nodeVal.path("time").asText());
+                final LocalDateTime nodeTimestamp = LocalDateTime.parse(nodeVal.path("time").asText(), C.FORMATTER);
 
                 boolean isBeginningOrAfter = nodeTimestamp.isAfter(beginning);
                 isBeginningOrAfter |= nodeTimestamp.isEqual(beginning);
@@ -151,18 +151,5 @@ public class FileSearcher {
         } catch(final IOException e) {
             C.logger.error(e.getMessage());
         }
-    }
-
-    /**
-     * Convert a formated datetime string to LocalDateTime type
-     *
-     * @param str
-     *         The plaint datatime string
-     *
-     * @return
-     *         The localDateTime type datetime
-     */
-    private LocalDateTime stringToLocalDateTime(String str){
-        return LocalDateTime.parse(str, C.FORMATTER);
     }
 }
