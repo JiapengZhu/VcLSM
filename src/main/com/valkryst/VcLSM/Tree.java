@@ -156,8 +156,6 @@ public class Tree <V> {
             return new ArrayList<>();
         }
 
-        readLock.lock();
-
         final List<Node> snapshotNodeList = new ArrayList<>();
 
         // Search in-memory nodes for any nodes created within specified time-range:
@@ -171,8 +169,6 @@ public class Tree <V> {
 
         // Search on-disk files for any nodes created within the specified time-range:
         snapshotNodeList.addAll(fileSearcher.rangeSearchFile(beginning, ending));
-
-        readLock.unlock();
 
         // Delete duplicated nodes:
         final ListIterator<Node> iteratorOuter = snapshotNodeList.listIterator();
