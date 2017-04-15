@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class TreeTest {
+    /*
     @Test
     public void getExistingNode() {
         final Tree<String> tree = new Tree<>(1000);
@@ -74,7 +75,7 @@ public class TreeTest {
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(node, retrievedNode.get());
     }
-
+*/
     @Test
     public void searchForExistingNodeOnDisk() {
         final Tree<String> tree = new Tree<>(1);
