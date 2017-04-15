@@ -1,8 +1,13 @@
 package main.com.valkryst.VcLSM.node;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
+import main.com.valkryst.VcLSM.C;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public class NodeBuilder {
     /** The key. */
@@ -52,6 +57,29 @@ public class NodeBuilder {
         if (value.isEmpty()) {
                 throw new IllegalStateException("A Node cannot have an empty value.");
         }
+    }
+
+    /**
+     * Attempts to load a node from the key, time, and value within the specified JsonNode.
+     *
+     * @param jsonNode
+     *         The JsonNode to load from.
+     */
+    public NodeBuilder loadFromJSON(final JsonNode jsonNode) {
+        try {
+            this.key = jsonNode.get("key").asText();
+            this.time = LocalDateTime.parse(jsonNode.get("time").asText(), C.FORMATTER);
+            this.value = jsonNode.get("value").asText();
+        } catch (final DateTimeParseException e) {
+            final Logger logger = LogManager.getLogger();
+            logger.error(e.getMessage());
+
+            this.key = null;
+            this.time = null;
+            this.value = null;
+        }
+
+        return this;
     }
 
     public NodeBuilder setKey(final String key) {
