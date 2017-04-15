@@ -61,12 +61,15 @@ public class FileMerger<V> {
             // For each file in the list, merge the previous and current files.
             while (iterator.hasNext()) {
                 final File previous = iterator.next();
-                final File current = iterator.next();
 
-                if (previous != null && current != null) {
-                    mergeFiles(previous, current);
-                    iterator.remove();
-                    iterator.previous();
+                if (iterator.hasNext()) {
+                    final File current = iterator.next();
+
+                    if (previous != null && current != null) {
+                        mergeFiles(previous, current);
+                        iterator.remove();
+                        iterator.previous();
+                    }
                 }
             }
 
