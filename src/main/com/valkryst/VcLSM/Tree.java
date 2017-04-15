@@ -24,7 +24,6 @@ public class Tree <V> {
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
     private final FileSearcher<V> fileSearcher = new FileSearcher<>();
-    private List<Node> snapshotNodeList = new ArrayList<Node>();
 
 
     /**
@@ -152,61 +151,53 @@ public class Tree <V> {
         }
     }
 
-    public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
+    public List<Node> snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
         if (beginning == null || ending == null) {
-            return;
+            return new ArrayList<>();
         }
 
         readLock.lock();
 
-        // Search nodes within specified time range from memory component
-        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
-            final Node<V> node = entry.getValue();
+        final List<Node> snapshotNodeList = new ArrayList<>();
+
+        // Search in-memory nodes for any nodes created within specified time-range:
+        map.forEach((key, node) -> {
             final LocalDateTime nodeTimestamp = node.getTime();
 
             if (nodeTimestamp.isAfter(beginning) && nodeTimestamp.isBefore(ending)) {
                 snapshotNodeList.add(node);
             }
-        }
+        });
 
-        // Search nodes within specified time range from disks
-        final List<Node> nodeList = fileSearcher.rangeSearchFile(beginning, ending);
-
-        if (nodeList.size() > 0) {
-            snapshotNodeList.addAll(nodeList);
-        }
+        // Search on-disk files for any nodes created within the specified time-range:
+        snapshotNodeList.addAll(fileSearcher.rangeSearchFile(beginning, ending));
 
         readLock.unlock();
 
-        // delete the duplicated nodes
-        writeLock.lock();
-        refineSnapshotNode();
-        writeLock.unlock();
-    }
+        // Delete duplicated nodes:
+        final ListIterator<Node> iteratorOuter = snapshotNodeList.listIterator();
 
-    // Once the search is done, delete the duplicated nodes to keep latest node version
-    private void refineSnapshotNode(){
-        final Set<String> detectionSet = new HashSet<>();
-        final ArrayList<Node> oldNodeList = new ArrayList<>();
-        int counter = 0;
+        while (iteratorOuter.hasNext()) {
+            final Node outerNode = iteratorOuter.next();
+            final ListIterator<Node> iteratorInner = snapshotNodeList.listIterator();
 
-        for (final Node node : snapshotNodeList) {
-            if (!detectionSet.add(node.getKey())) {
-                final Node oldNode = oldNodeList.get(counter - 1);
-                final LocalDateTime nodeTimestamp = node.getTime();
-                final LocalDateTime oldNodeTimestamp = oldNode.getTime();
+            while (iteratorInner.hasNext()) {
+                final Node innerNode = iteratorInner.next();
+                boolean keysEqual = outerNode.getKey().equals(innerNode.getKey());
 
-                if (oldNodeTimestamp.isBefore(nodeTimestamp)) {
-                    snapshotNodeList.remove(oldNode);
-                } else {
-                    snapshotNodeList.remove(node);
+                if (keysEqual) {
+                    boolean outerIsOlder = outerNode.getTime().isBefore(innerNode.getTime());
+
+                    if (outerIsOlder) {
+                        iteratorOuter.remove();
+                    } else {
+                        iteratorInner.remove();
+                    }
                 }
-            } else {
-                oldNodeList.add(node);
             }
-
-            counter++;
         }
+
+        return snapshotNodeList;
     }
 
     /** @return The total number of nodes in the tree. */
