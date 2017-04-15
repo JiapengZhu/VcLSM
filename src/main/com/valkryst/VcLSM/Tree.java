@@ -153,6 +153,10 @@ public class Tree <V> {
     }
 
     public void snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
+        if (beginning == null || ending == null) {
+            return;
+        }
+
         readLock.lock();
 
         // Search nodes within specified time range from memory component
