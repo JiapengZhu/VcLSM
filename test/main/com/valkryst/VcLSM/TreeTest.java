@@ -93,6 +93,20 @@ public class TreeTest {
         Assert.assertEquals(nodeA, retrievedNode.get());
     }
 
+    @Test
+    public void getTotalNodesOneThousand() {
+        final Tree<String> tree = new Tree<>(100000);
+
+        for (int i = 0 ; i < 1000 ; i++) {
+            final String tempKeyValue = String.valueOf(i);
+            tree.put(new NodeBuilder<String>().setKey(tempKeyValue)
+                    .setValue(tempKeyValue)
+                    .build());
+        }
+
+        Assert.assertEquals(tree.getTotalNodes(), 1000);
+    }
+
     @AfterClass
     public static void deleteDataDirectory() {
         try {
