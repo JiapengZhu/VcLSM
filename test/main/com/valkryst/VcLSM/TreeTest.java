@@ -76,6 +76,8 @@ public class TreeTest {
         final Optional<Node> retrievedNode = tree.search(node.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(node, retrievedNode.get());
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -95,6 +97,8 @@ public class TreeTest {
         final Optional<Node> retrievedNode = tree.search(nodeA.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(nodeA, retrievedNode.get());
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -130,6 +134,8 @@ public class TreeTest {
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
         Assert.assertEquals(snapshot.size(), 1);
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -148,6 +154,8 @@ public class TreeTest {
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
         Assert.assertEquals(snapshot.size(), 2);
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -179,6 +187,8 @@ public class TreeTest {
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
         Assert.assertEquals(snapshot.size(), 1);
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -206,6 +216,8 @@ public class TreeTest {
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
         Assert.assertEquals(snapshot.size(), 2);
+
+        deleteDataDirectory();
     }
 
     @Test
@@ -220,6 +232,8 @@ public class TreeTest {
         }
 
         Assert.assertEquals(tree.getTotalNodes(), 1000);
+
+        deleteDataDirectory();
     }
 
     @AfterClass
