@@ -94,7 +94,7 @@ public class FileSearcher <V> {
             while(fields.hasNext()){
                 final Map.Entry<String, JsonNode> entry = fields.next();
 
-                if(entry.getKey().contains(key)){
+                if(entry.getValue().get("key").asText().equals(key)) {
                     final JsonNode jsonNode = entry.getValue();
                     final LocalDateTime time = stringToLocalDateTime(jsonNode.path(C.TIME).asText());
 
