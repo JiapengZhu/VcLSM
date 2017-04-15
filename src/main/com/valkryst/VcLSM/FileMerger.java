@@ -66,9 +66,8 @@ public class FileMerger<V> {
                 if (previous != null && current != null) {
                     mergeFiles(previous, current);
                     iterator.remove();
+                    iterator.previous();
                 }
-
-                iterator.previous();
             }
 
             minLength += maximumTreeSize;
