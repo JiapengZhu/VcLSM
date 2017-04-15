@@ -1,8 +1,6 @@
 package main.com.valkryst.VcLSM.node;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
-import main.com.valkryst.VcLSM.C;
 
 import java.time.LocalDateTime;
 
@@ -56,16 +54,6 @@ public class NodeBuilder <V> {
                 throw new IllegalStateException("A Node cannot have an empty value.");
             }
         }
-    }
-
-    public void loadFromJSON(final JsonNode object) {
-        final String keyTmp = object.get("key").asText();
-        final String timeTmp = object.get("time").asText();
-        final String valueTmp = object.get("value").asText();
-
-        this.key = keyTmp;
-        this.time = LocalDateTime.parse(timeTmp, C.FORMATTER);
-        // todo Finish
     }
 
     public NodeBuilder<V> setKey(final String key) {
