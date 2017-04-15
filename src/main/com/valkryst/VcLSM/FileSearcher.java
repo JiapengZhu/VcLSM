@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class FileSearcher <V> {
+public class FileSearcher {
     private final ObjectMapper mapper = new ObjectMapper();
     private List<Node> nodeList = new ArrayList<>();
 
@@ -23,9 +23,9 @@ public class FileSearcher <V> {
      * @return
      *         The node, or nothing if no node is found.
      */
-    public Optional<Node<V>> search(final String key) {
+    public Optional<Node> search(final String key) {
         for (final File file : getSortedFiles()) {
-            final Optional<Node<V>> opt = searchFile(key, file);
+            final Optional<Node> opt = searchFile(key, file);
 
             // Return the first occurrence of a node using the specified key.
             if (opt.isPresent()) {
@@ -85,7 +85,7 @@ public class FileSearcher <V> {
      * @return
      *         The node, or nothing if no node is found.
      */
-    private Optional<Node<V>> searchFile(final String key, final File file) {
+    private Optional<Node> searchFile(final String key, final File file) {
         try {
             // Read the contents of the JSON file.
             final JsonNode rootNode = mapper.readTree(file);
@@ -99,7 +99,8 @@ public class FileSearcher <V> {
                     final LocalDateTime time = stringToLocalDateTime(jsonNode.path(C.TIME).asText());
 
                     // Construct and return the node:
-                    final Node<V> node = new Node(key, jsonNode.path(C.V).asText(), time);
+                    final Node node = new Node(key, jsonNode.path(C.V).asText(), time);
+                    System.out.println(jsonNode.path(C.V).asText());
                     return Optional.of(node);
                 }
             }
@@ -134,7 +135,7 @@ public class FileSearcher <V> {
                 final LocalDateTime nodeTimeStamp = stringToLocalDateTime(nodeTimeStampStr);
 
                 if (nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
-                    final Node<V> nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
+                    final Node nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
                     nodeList.add(nodeObj);
                 }
             }

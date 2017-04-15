@@ -4,13 +4,13 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-public class NodeBuilder <V> {
+public class NodeBuilder {
     /** The key. */
     @Getter private String key = null;
     /** The date & time at which the node was created. */
     @Getter private LocalDateTime time = LocalDateTime.now();
     /** The value. */
-    @Getter private V value = null;
+    @Getter private String value = null;
 
     /**
      * Uses the builder to construct a new Node.
@@ -21,9 +21,9 @@ public class NodeBuilder <V> {
      * @throws IllegalStateException
      *          If something is wrong with the builder's state.
      */
-    public Node<V> build() throws IllegalStateException {
+    public Node build() throws IllegalStateException {
         checkState();
-        return new Node<>(this);
+        return new Node(this);
     }
 
     /**
@@ -49,24 +49,22 @@ public class NodeBuilder <V> {
             throw new IllegalStateException("A Node cannot have a null value.");
         }
 
-        if (value instanceof String) {
-            if (((String) value).isEmpty()) {
+        if (value.isEmpty()) {
                 throw new IllegalStateException("A Node cannot have an empty value.");
-            }
         }
     }
 
-    public NodeBuilder<V> setKey(final String key) {
+    public NodeBuilder setKey(final String key) {
         this.key = key;
         return this;
     }
 
-    public NodeBuilder<V> setTime(final LocalDateTime time) {
+    public NodeBuilder setTime(final LocalDateTime time) {
         this.time = time;
         return this;
     }
 
-    public NodeBuilder<V> setValue(final V value) {
+    public NodeBuilder setValue(final String value) {
         this.value = value;
         return this;
     }

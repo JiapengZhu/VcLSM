@@ -1,11 +1,8 @@
 package main.com.valkryst.VcLSM;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -17,11 +14,10 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class FileMerger<V> {
+public class FileMerger {
     private final ObjectMapper mapper = new ObjectMapper();
     private final Logger logger = LogManager.getLogger();
 
@@ -102,7 +98,7 @@ public class FileMerger<V> {
      * @param fileName
      *         The output file name.
      */
-    public void mergeToDisk(ConcurrentSkipListMap<String, Node<V>> map, String fileName) throws IOException{
+    public void mergeToDisk(ConcurrentSkipListMap<String, Node> map, String fileName) throws IOException{
         mapper.writeValue(new File("data/"+fileName), map);
     }
 

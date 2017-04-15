@@ -13,16 +13,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Tree <V> {
+public class Tree {
     /** The maximum size of the tree, in bytes, before a Merge must occur. */
     private final int maximumSize;
     /** The current size of the tree, in bytes. */
     private int currentSize = 0;
     /** The underlying data structure of the tree. */
-    private final ConcurrentSkipListMap<String, Node<V>> map = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<String, Node> map = new ConcurrentSkipListMap<>();
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock writeLock = rwLock.writeLock();
-    private final FileSearcher<V> fileSearcher = new FileSearcher<>();
+    private final FileSearcher fileSearcher = new FileSearcher();
 
 
     /**
@@ -53,12 +53,12 @@ public class Tree <V> {
      * @return
      *         The found node.
      */
-    public Optional<Node<V>> get(final String key) {
+    public Optional<Node> get(final String key) {
         if (key == null || key.isEmpty()) {
             return Optional.empty();
         }
 
-        for (final Map.Entry<String, Node<V>> entry : map.entrySet()) {
+        for (final Map.Entry<String, Node> entry : map.entrySet()) {
             final String nodeKey = entry.getValue().getKey();
 
             if (nodeKey.equals(key)) {
@@ -77,7 +77,7 @@ public class Tree <V> {
      * @param node
      *         The node.
      */
-    public void put(final Node<V> node) {
+    public void put(final Node node) {
         if (node == null) {
             return;
         }
@@ -103,13 +103,13 @@ public class Tree <V> {
      * @return
      *         The found node.
      */
-    public Optional<Node<V>> search(final String key) {
+    public Optional<Node> search(final String key) {
         if (key == null || key.isEmpty()) {
             return Optional.empty();
         }
 
         // Search the in-memory map:
-        Optional<Node<V>> tmp = get(key);
+        Optional<Node> tmp = get(key);
 
         if (tmp.isPresent()) {
             return tmp;
@@ -125,7 +125,7 @@ public class Tree <V> {
 
         // Create a new in-memory map, this is immutable and will be merged onto disk.
         // The old in-memory map will is mutable and will be reused.
-        final ConcurrentSkipListMap<String, Node<V>> newMap = new ConcurrentSkipListMap<> ();
+        final ConcurrentSkipListMap<String, Node> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
         map.clear();
         currentSize = 0;
@@ -134,7 +134,7 @@ public class Tree <V> {
         // Merge:
         try {
             writeLock.lock();
-            final FileMerger<V> fileMerger = new FileMerger<>();
+            final FileMerger fileMerger = new FileMerger();
             final String fileName = System.currentTimeMillis() + ".dat";
 
             // Merge in-memory data into disk

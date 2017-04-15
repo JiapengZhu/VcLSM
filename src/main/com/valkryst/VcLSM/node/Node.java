@@ -5,13 +5,13 @@ import main.com.valkryst.VcLSM.C;
 
 import java.time.LocalDateTime;
 
-public class Node <V> implements Comparable<Node<V>> {
+public class Node implements Comparable<Node> {
     /** The key. */
     @Getter private final String key;
     /** The date & time at which the node was created. */
     @Getter private final LocalDateTime time;
     /** The value. */
-    @Getter private final V value;
+    @Getter private final String value;
 
     /**
      * Constructs a new Node.
@@ -19,21 +19,21 @@ public class Node <V> implements Comparable<Node<V>> {
      * @param builder
      *         The builder to use.
      */
-    public Node(final NodeBuilder<V> builder) {
+    public Node(final NodeBuilder builder) {
         key = builder.getKey();
         time = builder.getTime();
         value = builder.getValue();
     }
 
     // Construct a customized constructor by specifying a timestamp
-    public Node(final String key, final V value, final LocalDateTime time){
+    public Node(final String key, final String value, final LocalDateTime time){
         this.key = key;
         this.value = value;
         this.time = time;
     }
 
     @Override
-    public int compareTo(final Node<V> other) {
+    public int compareTo(final Node other) {
         return this.time.compareTo(other.time);
     }
 
@@ -43,7 +43,7 @@ public class Node <V> implements Comparable<Node<V>> {
             return false;
         }
 
-        final Node<V> otherNode = (Node<V>) obj;
+        final Node otherNode = (Node) obj;
 
         boolean isEqual = key.equals(otherNode.getKey());
         isEqual &= time.equals(otherNode.getTime());
