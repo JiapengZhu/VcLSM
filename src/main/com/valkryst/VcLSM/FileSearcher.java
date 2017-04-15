@@ -3,6 +3,7 @@ package main.com.valkryst.VcLSM;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import main.com.valkryst.VcLSM.node.Node;
+import main.com.valkryst.VcLSM.node.NodeBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,8 +100,10 @@ public class FileSearcher {
                     final LocalDateTime time = stringToLocalDateTime(jsonNode.path(C.TIME).asText());
 
                     // Construct and return the node:
-                    final Node node = new Node(key, jsonNode.path(C.V).asText(), time);
-                    System.out.println(jsonNode.path(C.V).asText());
+                    final Node node = new NodeBuilder().setKey(key)
+                                                       .setValue(jsonNode.path(C.V).asText())
+                                                       .setTime(time)
+                                                       .build();
                     return Optional.of(node);
                 }
             }
@@ -135,7 +138,10 @@ public class FileSearcher {
                 final LocalDateTime nodeTimeStamp = stringToLocalDateTime(nodeTimeStampStr);
 
                 if (nodeTimeStamp.isAfter(start) && nodeTimeStamp.isBefore(end)){
-                    final Node nodeObj = new Node(nodeVal.path(C.K).asText(), nodeVal.path(C.V).asText(), nodeTimeStamp);
+                    final Node nodeObj = new NodeBuilder().setKey(nodeVal.path(C.K).asText())
+                                                         .setValue(nodeVal.path(C.V).asText())
+                                                         .setTime(nodeTimeStamp)
+                                                         .build();
                     nodeList.add(nodeObj);
                 }
             }
