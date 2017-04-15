@@ -81,6 +81,7 @@ public class TreeTest {
     public void searchForExistingNodeOnDisk() {
         final Tree<String> tree = new Tree<>(1);
         final Node<String> nodeA = new NodeBuilder<String>().setKey("Node Key").setValue("Node Value").build();
+        tree.put(nodeA);
 
         for (int i = 0 ; i < 1000 ; i++) {
             final String tempKeyValue = String.valueOf(i);
