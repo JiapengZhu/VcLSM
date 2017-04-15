@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class TreeTest {
@@ -91,6 +92,24 @@ public class TreeTest {
         final Optional<Node<String>> retrievedNode = tree.search(nodeA.getKey());
         Assert.assertTrue(retrievedNode.isPresent());
         Assert.assertEquals(nodeA, retrievedNode.get());
+    }
+
+    @Test
+    public void snapshotWithNullBeginningTime() {
+        final Tree<String> tree = new Tree<>(1);
+        tree.snapshot(null, LocalDateTime.now());
+    }
+
+    @Test
+    public void snapshotWithNullEndingTime() {
+        final Tree<String> tree = new Tree<>(1);
+        tree.snapshot(LocalDateTime.now(), null);
+    }
+
+    @Test
+    public void snapshotWithNullBeginningAndEndingTime() {
+        final Tree<String> tree = new Tree<>(1);
+        tree.snapshot(null, null);
     }
 
     @Test
