@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import main.com.valkryst.VcLSM.node.Node;
 import main.com.valkryst.VcLSM.node.NodeBuilder;
+import main.com.valkryst.VcLSM.node.NodeList;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,9 +12,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class FileSearcher {
-    private final ObjectMapper mapper = new ObjectMapper();
-    private List<Node> nodeList = new ArrayList<>();
-
     /**
      * Searches through all .dat files within the data directory for the first occurrence of a node using the specified
      * key.
@@ -49,10 +47,15 @@ public class FileSearcher {
      * @return
      *         a list contains found nodes
      */
-    public List<Node> rangeSearchFile(final LocalDateTime beginning, final LocalDateTime ending){
+    public List<Node> rangeSearchFile(final LocalDateTime beginning, final LocalDateTime ending) {
+        final NodeList nodeList = new NodeList();
+
         for (final File file : getSortedFiles()) {
-            searchFileByTimestamp(beginning, ending, file);
+             nodeList.addAll(searchFileByTimestamp(beginning, ending, file));
         }
+
+        nodeList.removeDuplicateNodes();
+
         return nodeList;
     }
 
@@ -89,7 +92,7 @@ public class FileSearcher {
     private Optional<Node> searchFile(final String key, final File file) {
         try {
             // Read the contents of the JSON file.
-            final JsonNode rootNode = mapper.readTree(file);
+            final JsonNode rootNode = new ObjectMapper().readTree(file);
             final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
 
             while(fields.hasNext()){
@@ -111,8 +114,7 @@ public class FileSearcher {
     }
 
     /**
-     * Searches a file in data directory for a specified time range from user
-     * key.
+     * Searches a file in data directory for a specified time range from user key.
      *
      * @param beginning
      *         The beginning time.
@@ -124,32 +126,35 @@ public class FileSearcher {
      *         The file to be searched.
      *
      */
-    private void searchFileByTimestamp(final LocalDateTime beginning, final LocalDateTime ending, final File file){
-        try{
-            final JsonNode rootNode = mapper.readTree(file);
-            final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+    private List<Node> searchFileByTimestamp(final LocalDateTime beginning, final LocalDateTime ending, final File file){
+        if (beginning == null || ending == null || file == null) {
+            return new ArrayList<>();
+        }
 
-            while(fields.hasNext()){
-                final Map.Entry<String, JsonNode> entry = fields.next();
+        try {
+            final NodeList nodeList = new NodeList();
+
+            final JsonNode rootNode = new ObjectMapper().readTree(file);
+
+            rootNode.fields().forEachRemaining(entry -> {
                 final JsonNode nodeVal = entry.getValue();
 
                 // Determine if Node is within specified time-range:
                 final LocalDateTime nodeTimestamp = LocalDateTime.parse(nodeVal.path("time").asText(), C.FORMATTER);
 
-                boolean isBeginningOrAfter = nodeTimestamp.isAfter(beginning);
-                isBeginningOrAfter |= nodeTimestamp.isEqual(beginning);
-
-                boolean isEndingOrBefore = nodeTimestamp.isBefore(ending);
-                isEndingOrBefore |= nodeTimestamp.isEqual(ending);
-
                 // Construct and add the Node if it's within the time-range:
-                if (isBeginningOrAfter && isEndingOrBefore) {
+                if (Node.isWithinTimeRange(beginning, ending, nodeTimestamp)) {
                     final Node nodeObj = new NodeBuilder().loadFromJSON(nodeVal).build();
                     nodeList.add(nodeObj);
                 }
-            }
+            });
+
+            nodeList.removeDuplicateNodes();
+            return nodeList;
         } catch(final IOException e) {
             C.logger.error(e.getMessage());
         }
+
+        return new ArrayList<>();
     }
 }
