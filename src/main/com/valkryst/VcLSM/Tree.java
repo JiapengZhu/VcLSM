@@ -146,6 +146,8 @@ public class Tree {
         } catch (final IOException e) {
             final Logger logger = LogManager.getLogger();
             logger.error(e.getMessage());
+
+            map.putAll(newMap);
         } finally {
             writeLock.unlock();
         }
