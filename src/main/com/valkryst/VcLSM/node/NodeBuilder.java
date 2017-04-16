@@ -3,6 +3,7 @@ package main.com.valkryst.VcLSM.node;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import main.com.valkryst.VcLSM.C;
+import main.com.valkryst.VcLSM.FileSearcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -67,9 +68,10 @@ public class NodeBuilder {
      */
     public NodeBuilder loadFromJSON(final JsonNode jsonNode) {
         try {
-            this.key = jsonNode.get("key").asText();
-            this.time = LocalDateTime.parse(jsonNode.get("time").asText(), C.FORMATTER);
-            this.value = jsonNode.get("value").asText();
+            this.key = jsonNode.path(C.K).asText();
+            LocalDateTime formatedTime = FileSearcher.formatTimeString(jsonNode.path(C.TIME).asText());
+            this.time = formatedTime;
+            this.value = jsonNode.path(C.V).asText();
         } catch (final DateTimeParseException e) {
             final Logger logger = LogManager.getLogger();
             logger.error(e.getMessage());

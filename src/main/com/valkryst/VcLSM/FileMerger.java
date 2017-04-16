@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class FileMerger {
-    private final ObjectMapper mapper = new ObjectMapper();
+    public final static ObjectMapper mapper = new ObjectMapper();
     private final Logger logger = LogManager.getLogger();
 
     /** Constructs a new FileMerger. */

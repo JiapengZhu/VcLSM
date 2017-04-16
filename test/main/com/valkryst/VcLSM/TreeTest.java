@@ -161,7 +161,7 @@ public class TreeTest {
     public void getSnapshotWithOneUniqueReturnableNodeOnDisk() {
         final Tree tree = new Tree(1);
 
-        final LocalDateTime beforeStartTime = LocalDateTime.of(0, 1, 1, 1, 1);
+        final LocalDateTime beforeStartTime = LocalDateTime.of(1, 1, 1, 1, 1);
         final LocalDateTime beginningTime = LocalDateTime.now();
         final LocalDateTime endingTime = LocalDateTime.MAX;
 
@@ -194,7 +194,7 @@ public class TreeTest {
     public void getSnapshotWithTwoUniqueReturnableNodesOnDisk() {
         final Tree tree = new Tree(1);
 
-        final LocalDateTime beforeStartTime = LocalDateTime.of(0, 1, 1, 1, 1);
+        final LocalDateTime beforeStartTime = LocalDateTime.of(1, 1, 1, 1, 1);
         final LocalDateTime beginningTime = LocalDateTime.now();
         final LocalDateTime endingTime = LocalDateTime.MAX;
 
