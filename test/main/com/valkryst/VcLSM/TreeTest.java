@@ -124,7 +124,7 @@ public class TreeTest {
         final Tree tree = new Tree(1000);
 
         final LocalDateTime beginningTime = LocalDateTime.now();
-        final LocalDateTime endingTime = LocalDateTime.MAX;
+        final LocalDateTime endingTime = LocalDateTime.of(3000, 1, 1, 1, 1);
 
         final Node nodeA = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
         final Node nodeB = new NodeBuilder().setKey("Node Key").setTime(beginningTime).setValue("Node Value").build();
@@ -143,7 +143,7 @@ public class TreeTest {
         final Tree tree = new Tree(1000);
 
         final LocalDateTime beginningTime = LocalDateTime.now();
-        final LocalDateTime endingTime = LocalDateTime.MAX;
+        final LocalDateTime endingTime = LocalDateTime.of(3000, 1, 1, 1, 1);
 
         final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beginningTime).setValue("Node Value").build();
         final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(endingTime).setValue("Node Value").build();
@@ -163,7 +163,7 @@ public class TreeTest {
 
         final LocalDateTime beforeStartTime = LocalDateTime.of(1, 1, 1, 1, 1);
         final LocalDateTime beginningTime = LocalDateTime.now();
-        final LocalDateTime endingTime = LocalDateTime.MAX;
+        final LocalDateTime endingTime = LocalDateTime.of(3000, 1, 1, 1, 1);
 
         final Node nodeA = new NodeBuilder().setKey("Node Key").setTime(beforeStartTime).setValue("Node Value").build();
         final Node nodeB = new NodeBuilder().setKey("Node Key").setTime(beforeStartTime).setValue("Node Value").build();
@@ -180,8 +180,9 @@ public class TreeTest {
         for (int i = 0 ; i < 1000 ; i++) {
             final String tempKeyValue = String.valueOf(i);
             tree.put(new NodeBuilder().setKey(tempKeyValue)
-                    .setValue(tempKeyValue)
-                    .build());
+                                      .setTime(beforeStartTime)
+                                      .setValue(tempKeyValue)
+                                      .build());
         }
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
@@ -196,10 +197,10 @@ public class TreeTest {
 
         final LocalDateTime beforeStartTime = LocalDateTime.of(1, 1, 1, 1, 1);
         final LocalDateTime beginningTime = LocalDateTime.now();
-        final LocalDateTime endingTime = LocalDateTime.MAX;
+        final LocalDateTime endingTime = LocalDateTime.of(3000, 1, 1, 1, 1);
 
-        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beforeStartTime).setValue("Node Value").build();
-        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(endingTime).setValue("Node Value").build();
 
         tree.put(nodeA);
         tree.put(nodeB);
@@ -209,8 +210,9 @@ public class TreeTest {
         for (int i = 0 ; i < 1000 ; i++) {
             final String tempKeyValue = String.valueOf(i);
             tree.put(new NodeBuilder().setKey(tempKeyValue)
-                    .setValue(tempKeyValue)
-                    .build());
+                                      .setTime(beforeStartTime)
+                                      .setValue(tempKeyValue)
+                                      .build());
         }
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
