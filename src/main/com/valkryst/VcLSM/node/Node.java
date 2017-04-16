@@ -49,4 +49,49 @@ public class Node implements Comparable<Node> {
     public String getKeyWithTimestamp(){
         return key + C.DILIMETER + time;
     }
+
+    /**
+     * Determines if the node's time is equal to, or within, the specified time range.
+     *
+     * @param beginning
+     *         The beginning time.
+     *
+     * @param ending
+     *         The ending time.
+     *
+     * @return
+     *         Whether or not the node's time is equal to, or within, the specified time range.
+     */
+    public boolean isWithinTimeRange(final LocalDateTime beginning, final LocalDateTime ending) {
+        return isWithinTimeRange(beginning, ending, time);
+    }
+
+    /**
+     * Determines if the time is equal to, or within, the specified time range.
+     *
+     * @param beginning
+     *         The beginning time.
+     *
+     * @param ending
+     *         The ending time.
+     *
+     * @param time
+     *         The time to check.
+     *
+     * @return
+     *         Whether or not the time is equal to, or within, the specified time range.
+     */
+    public static boolean isWithinTimeRange(final LocalDateTime beginning, final LocalDateTime ending, final LocalDateTime time) {
+        if (beginning == null || ending == null) {
+            return false;
+        }
+
+        boolean isBeginningOrAfter = time.isAfter(beginning);
+        isBeginningOrAfter |= time.isEqual(beginning);
+
+        boolean isEndingOrBefore = time.isBefore(ending);
+        isEndingOrBefore |= time.isEqual(ending);
+
+        return isBeginningOrAfter & isEndingOrBefore;
+    }
 }
