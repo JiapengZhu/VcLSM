@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import main.com.valkryst.VcLSM.node.Node;
-import main.com.valkryst.VcLSM.node.NodeBuilder;
-import main.com.valkryst.VcLSM.node.NodeList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +19,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class FileMerger {
     public final static ObjectMapper mapper = new ObjectMapper();
-    private final Logger logger = LogManager.getLogger();
 
     /** Constructs a new FileMerger. */
     public FileMerger() {
@@ -35,10 +32,9 @@ public class FileMerger {
         mapper.registerModule(javaTimeModule);
 
         if (! dataDirectory.exists()) {
-
             if (! dataDirectory.mkdir()) {
+                final Logger logger = LogManager.getLogger();
                 logger.error("Unable to create data directory.");
-                // todo Maybe exit the program?
                 System.exit(1);
             }
         }
@@ -113,7 +109,7 @@ public class FileMerger {
     }
 
     /**
-     * Merges the specified files into a single file.
+     * Merges the files into a single file.
      *
      * @param fileA
      *         The first file.
@@ -121,7 +117,6 @@ public class FileMerger {
      * @param fileB
      *         The second file.
      */
-
     private void mergeFiles(final File fileA, final File fileB) {
         if (fileA == null || fileB == null) {
             return;
@@ -209,10 +204,12 @@ public class FileMerger {
 
             // Delete file B
             if (!fileB.delete()) {
-                logger.error("Fail to delete " + fileB.getName());
+                final Logger logger = LogManager.getLogger();
+                logger.error("Failed to delete " + fileB.getName());
                 System.exit(1);
             }
         } catch (final IOException e) {
+            final Logger logger = LogManager.getLogger();
             logger.error(e.getMessage());
         }
     }
@@ -270,5 +267,4 @@ public class FileMerger {
         final LocalDateTime bLocalTime = LocalDateTime.parse(timeB);
         return aLocalTime.isBefore(bLocalTime);
     }
-
 }
