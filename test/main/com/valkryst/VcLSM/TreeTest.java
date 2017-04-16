@@ -237,6 +237,7 @@ public class TreeTest {
 
     @AfterClass
     public static void deleteDataDirectory() {
+
         try {
             FileUtils.deleteDirectory(new File("data/"));
         } catch (final IOException e) {

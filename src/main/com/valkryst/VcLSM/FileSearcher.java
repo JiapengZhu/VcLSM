@@ -152,7 +152,7 @@ public class FileSearcher {
                 final JsonNode nodeVal = entry.getValue();
                 // Determine if Node is within specified time-range:
                 //final LocalDateTime nodeTimestamp = LocalDateTime.parse(nodeVal.path("time").asText(), C.FORMATTER);
-                final LocalDateTime nodeTimestamp = formatTimeString(nodeVal.path("time").asText());
+                final LocalDateTime nodeTimestamp = formatTimeString(nodeVal.path(C.TIME).asText());
                 // Construct and add the Node if it's within the time-range:
                 if (Node.isWithinTimeRange(beginning, ending, nodeTimestamp)) {
                     final Node nodeObj = new NodeBuilder().loadFromJSON(nodeVal).build();
