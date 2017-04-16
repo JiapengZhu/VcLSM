@@ -20,7 +20,7 @@ public class NodeListTest {
 
         nodeList.removeDuplicateNodes();
 
-        Assert.assertEquals(nodeList.size(), 1);
+        Assert.assertEquals(1, nodeList.size());
         Assert.assertTrue(nodeList.get(0).equals(nodeA));
     }
 
@@ -39,7 +39,7 @@ public class NodeListTest {
 
         nodeList.removeDuplicateNodes();
 
-        Assert.assertEquals(nodeList.size(), 1);
+        Assert.assertEquals(1, nodeList.size());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class NodeListTest {
 
         nodeList.removeDuplicateNodes();
 
-        Assert.assertEquals(nodeList.size(), 1);
+        Assert.assertEquals(1, nodeList.size());
         Assert.assertTrue(nodeList.get(0).equals(nodeD));
     }
 
@@ -85,7 +85,7 @@ public class NodeListTest {
 
         nodeList.removeDuplicateNodes();
 
-        Assert.assertEquals(nodeList.size(), 1);
+        Assert.assertEquals(1, nodeList.size());
         Assert.assertTrue(nodeList.get(0).equals(nodeD));
     }
 }
