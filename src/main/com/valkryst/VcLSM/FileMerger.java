@@ -26,7 +26,7 @@ public class FileMerger {
         final File dataDirectory = new File("data/");
 
         // Handle the deserialized date time format issue
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        final JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(C.FORMATTER));
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.registerModule(javaTimeModule);
@@ -99,10 +99,24 @@ public class FileMerger {
      *
      * @param fileName
      *         The output file name.
+     *
+     * @throws IOException
+     *          If an I/O exception occurs.
+     *
+     * @throws IllegalStateException
+     *          If any of the arguments are null.
+     *          If the map is empty.
+     *          If the fileName is blank.
      */
-    public void mergeToDisk(final ConcurrentSkipListMap<String, Node> map, final String fileName) throws IOException {
+    public void mergeToDisk(final ConcurrentSkipListMap<String, Node> map, final String fileName) throws IOException, IllegalStateException {
         if (map == null || map.size() == 0 || fileName == null || fileName.isEmpty()) {
-            return;
+            String message = "One of the parameters of mergeToDisk is in an invalid state.\n";
+            message += "\tIs 'map' null? -> " + (map == null);
+            message += "\tIs 'map' empty? -> " + (map == null || map.size() == 0);
+            message += "\tIs 'fileName' null? -> " + (fileName == null);
+            message += "\tIs 'fileName' blank? -> " + (fileName == null || fileName.isEmpty());
+
+            throw new IllegalArgumentException(message);
         }
 
         mapper.writeValue(new File("data/" + fileName), map);
