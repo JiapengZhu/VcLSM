@@ -50,6 +50,10 @@ public class FileMerger {
      *
      */
     public void merge(final int maximumTreeSize) {
+        if (maximumTreeSize < 1) {
+            return;
+        }
+
         long minLength = 0;
         long maxLength = maximumTreeSize;
         long totalFiles = getFilesInSizeRange(0, Long.MAX_VALUE).size();
@@ -98,8 +102,12 @@ public class FileMerger {
      * @param fileName
      *         The output file name.
      */
-    public void mergeToDisk(ConcurrentSkipListMap<String, Node> map, String fileName) throws IOException{
-        mapper.writeValue(new File("data/"+fileName), map);
+    public void mergeToDisk(final ConcurrentSkipListMap<String, Node> map, final String fileName) throws IOException {
+        if (map == null || map.size() == 0 || fileName == null || fileName.isEmpty()) {
+            return;
+        }
+
+        mapper.writeValue(new File("data/" + fileName), map);
     }
 
     /**
@@ -113,6 +121,10 @@ public class FileMerger {
      */
 
     private void mergeFiles(final File fileA, final File fileB) {
+        if (fileA == null || fileB == null) {
+            return;
+        }
+
         final Set<String> s = new HashSet<>();
         final JsonNode rootNodeA, rootNodeB;
         final ArrayNode objArrNodeA = mapper.createArrayNode();
@@ -212,6 +224,10 @@ public class FileMerger {
      *         A list of all files within the data directory whose file-sizes are within the specified range.
      */
     private List<File> getFilesInSizeRange(final long minLength, final long maxLength) {
+        if (minLength < 0 || maxLength < 1) {
+            return new ArrayList<>();
+        }
+
         // Retrieve all files in the data folder that end with the ".dat" extension:
         final File[] allFiles = new File("data/").listFiles(pathname -> {
             boolean accept = pathname.getName().toLowerCase().endsWith(".dat");
