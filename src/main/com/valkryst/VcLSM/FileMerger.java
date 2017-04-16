@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import main.com.valkryst.VcLSM.node.Node;
+import main.com.valkryst.VcLSM.node.NodeBuilder;
+import main.com.valkryst.VcLSM.node.NodeList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class FileMerger {
-    private final ObjectMapper mapper = new ObjectMapper();
+    public final static ObjectMapper mapper = new ObjectMapper();
     private final Logger logger = LogManager.getLogger();
 
     /** Constructs a new FileMerger. */
@@ -156,7 +158,7 @@ public class FileMerger {
                     // if to-be merged data is later than merging data, update the merging data
                     final String bTime = bJsonNodeVal.path(C.TIME).asText();
                     final String aTime = objArrNodeA.get(i).path(C.TIME).asText();
-                  // System.out.println(bJsonNodeVal.path(C.TIME) + "\t" + bJsonNodeVal.path(C.TIME).asText().length());
+
                     if (isDateTimeBefore(aTime, bTime)) {
                         final String aNewKey = objArrNodeA.get(i).path(C.K).asText() + "+" + bTime;
                         aObjNodes.remove(keyArrNodeA.get(i).asText());
@@ -176,6 +178,7 @@ public class FileMerger {
             int k = 0; // trace the index
             final Iterator<Map.Entry<String, JsonNode>> aObjNodeFields = aObjNodes.fields();
             final ArrayNode keyWithTimeArr = mapper.createArrayNode(); // trace the old keys with timestamp
+            final ArrayNode oldKeyWithTimeArr = mapper.createArrayNode(); // it contains the old node to be deleted
 
             while(aObjNodeFields.hasNext()){
                 final Map.Entry<String, JsonNode> entry = aObjNodeFields.next();
@@ -187,7 +190,7 @@ public class FileMerger {
                     final JsonNode oldEntryValueNode = aObjNodes.get(oldKeyWithTime);
 
                     if (isDateTimeBefore(oldEntryValueNode.path(C.TIME).asText(), entryValueNode.path(C.TIME).asText())) {
-                        aObjNodes.remove(oldKeyWithTime);
+                        oldKeyWithTimeArr.add(oldKeyWithTime);
                     } else {
                         aObjNodeFields.remove();
                     }
@@ -196,6 +199,9 @@ public class FileMerger {
                 }
 
                 k++;
+            }
+            for(JsonNode oldKey : oldKeyWithTimeArr){
+                aObjNodes.remove(oldKey.asText());
             }
 
             // overwrite file A by merged data
