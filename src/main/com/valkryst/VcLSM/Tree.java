@@ -2,6 +2,7 @@ package main.com.valkryst.VcLSM;
 
 import main.com.valkryst.VcLSM.node.Node;
 import main.com.valkryst.VcLSM.node.NodeInstrumentation;
+import main.com.valkryst.VcLSM.node.NodeList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -155,47 +156,18 @@ public class Tree {
             return new ArrayList<>();
         }
 
-        final List<Node> snapshotNodeList = new ArrayList<>();
+        final NodeList snapshotNodeList = new NodeList();
 
         // Search in-memory nodes for any nodes created within specified time-range:
         map.forEach((key, node) -> {
-            final LocalDateTime nodeTimestamp = node.getTime();
-
-            boolean isBeginningOrAfter = nodeTimestamp.isAfter(beginning);
-            isBeginningOrAfter |= nodeTimestamp.isEqual(beginning);
-
-            boolean isEndingOrBefore = nodeTimestamp.isBefore(ending);
-            isEndingOrBefore |= nodeTimestamp.isEqual(ending);
-
-            if (isBeginningOrAfter && isEndingOrBefore) {
+            if (node.isWithinTimeRange(beginning, ending)) {
                 snapshotNodeList.add(node);
             }
         });
 
         // Search on-disk files for any nodes created within the specified time-range:
         snapshotNodeList.addAll(fileSearcher.rangeSearchFile(beginning, ending));
-
-        // Delete duplicated nodes:
-        final ListIterator<Node> it = snapshotNodeList.listIterator();
-
-        while (it.hasNext()) {
-            final Node outerNode = it.next();
-
-            while (it.hasNext()) {
-                final Node innerNode = it.next();
-                boolean keysEqual = outerNode.getKey().equals(innerNode.getKey());
-
-                if (keysEqual) {
-                    boolean outerIsOlder = outerNode.getTime().isBefore(innerNode.getTime());
-
-                    if (outerIsOlder) {
-                        it.remove();
-                    } else {
-                        it.remove();
-                    }
-                }
-            }
-        }
+        snapshotNodeList.removeDuplicateNodes();
 
         return snapshotNodeList;
     }
