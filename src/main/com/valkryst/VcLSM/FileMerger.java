@@ -276,6 +276,18 @@ public class FileMerger {
         return validFiles;
     }
 
+    /**
+     * Parses the times to LocalDateTime objects and determines whether or not timeA < timeB.
+     *
+     * @param timeA
+     *         The first time.
+     *
+     * @param timeB
+     *         The second time.
+     *
+     * @return
+     *         Whether or not the first time is before the second time.
+     */
     private static boolean isDateTimeBefore(final String timeA, final String timeB) {
         final LocalDateTime aLocalTime = LocalDateTime.parse(timeA);
         final LocalDateTime bLocalTime = LocalDateTime.parse(timeB);
