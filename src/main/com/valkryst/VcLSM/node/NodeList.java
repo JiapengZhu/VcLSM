@@ -15,14 +15,15 @@ public class NodeList extends ArrayList<Node> {
         for (int a = 0 ; a < this.size() ; a++) {
             final Node outerNode = this.get(a);
             final String outerKey = outerNode.getKey();
-            final LocalDateTime outerTime = outerNode.getTime();
 
             for (int b = a + 1 ; b < this.size() ; b++) {
                 final Node innerNode = this.get(b);
                 final String innerKey = innerNode.getKey();
-                final LocalDateTime innerTime = innerNode.getTime();
 
                 if (outerKey.equals(innerKey)) {
+                    final LocalDateTime outerTime = outerNode.getTime();
+                    final LocalDateTime innerTime = innerNode.getTime();
+
                     final boolean outerIsOlder = outerTime.isBefore(innerTime);
                     final boolean nodesAreEquallyAsOld = outerTime.equals(innerTime);
 
