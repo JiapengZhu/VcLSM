@@ -23,6 +23,10 @@ public class FileSearcher {
      *         The node, or nothing if no node is found.
      */
     public Optional<Node> search(final String key) {
+        if (key == null || key.isEmpty()) {
+            return Optional.empty();
+        }
+
         for (final File file : getSortedFiles()) {
             final Optional<Node> opt = searchFile(key, file);
 
@@ -48,6 +52,10 @@ public class FileSearcher {
      *         a list contains found nodes
      */
     public List<Node> rangeSearchFile(final LocalDateTime beginning, final LocalDateTime ending) {
+        if (beginning == null || ending == null) {
+            return new NodeList();
+        }
+
         final NodeList nodeList = new NodeList();
 
         for (final File file : getSortedFiles()) {
@@ -90,6 +98,10 @@ public class FileSearcher {
      *         The node, or nothing if no node is found.
      */
     private Optional<Node> searchFile(final String key, final File file) {
+        if (key == null || key.isEmpty() || file == null) {
+            return Optional.empty();
+        }
+
         try {
             // Read the contents of the JSON file.
             final JsonNode rootNode = new ObjectMapper().readTree(file);
