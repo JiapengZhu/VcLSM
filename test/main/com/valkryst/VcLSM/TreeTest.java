@@ -53,7 +53,7 @@ public class TreeTest {
 
         tree.put(node);
 
-        Assert.assertEquals(tree.getTotalNodes(), 1);
+        Assert.assertEquals(1, tree.getTotalNodes());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class TreeTest {
 
         tree.put(node);
 
-        Assert.assertEquals(tree.getTotalNodes(), 0);
+        Assert.assertEquals(0, tree.getTotalNodes());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class TreeTest {
         tree.put(nodeB);
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
-        Assert.assertEquals(snapshot.size(), 1);
+        Assert.assertEquals(1, snapshot.size());
 
         deleteDataDirectory();
     }
@@ -153,7 +153,7 @@ public class TreeTest {
         tree.put(nodeB);
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
-        Assert.assertEquals(snapshot.size(), 2);
+        Assert.assertEquals(2, snapshot.size());
 
         deleteDataDirectory();
     }
@@ -186,7 +186,7 @@ public class TreeTest {
         }
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
-        Assert.assertEquals(snapshot.size(), 1);
+        Assert.assertEquals(1, snapshot.size());
 
         deleteDataDirectory();
     }
@@ -215,7 +215,7 @@ public class TreeTest {
         }
 
         final List<Node> snapshot = tree.snapshot(beginningTime, endingTime);
-        Assert.assertEquals(snapshot.size(), 2);
+        Assert.assertEquals(2, snapshot.size());
 
         deleteDataDirectory();
     }
@@ -231,7 +231,7 @@ public class TreeTest {
                     .build());
         }
 
-        Assert.assertEquals(tree.getTotalNodes(), 1000);
+        Assert.assertEquals(1000, tree.getTotalNodes());
 
         deleteDataDirectory();
     }
