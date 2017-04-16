@@ -243,16 +243,9 @@ public class FileMerger {
         return validFiles;
     }
 
-    private static boolean isDateTimeBefore(String timeA, String timeB){
-        while (timeA.length() != 23){
-            timeA = timeA + "0";
-        }
-        while(timeB.length() != 23){
-            timeB = timeB + "0";
-        }
-
-        final LocalDateTime aLocalTime = LocalDateTime.parse(timeA, C.FORMATTER);
-        final LocalDateTime bLocalTime = LocalDateTime.parse(timeB, C.FORMATTER);
+    private static boolean isDateTimeBefore(final String timeA, final String timeB) {
+        final LocalDateTime aLocalTime = LocalDateTime.parse(timeA);
+        final LocalDateTime bLocalTime = LocalDateTime.parse(timeB);
         return aLocalTime.isBefore(bLocalTime);
     }
 
