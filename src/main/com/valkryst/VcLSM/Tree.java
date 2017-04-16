@@ -143,7 +143,7 @@ public class Tree {
 
             // Merge all of the on-disk files:
             fileMerger.merge(maximumSize);
-        } catch (final IOException e) {
+        } catch (final IOException | IllegalStateException e) {
             final Logger logger = LogManager.getLogger();
             logger.error(e.getMessage());
 
