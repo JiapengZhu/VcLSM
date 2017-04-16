@@ -29,7 +29,7 @@ public class NodeList extends ArrayList<Node> {
                     final boolean outerIsOlder = outerTime.isBefore(innerTime);
                     final boolean nodesAreEquallyAsOld = outerTime.equals(innerTime);
 
-                    if (outerIsOlder) {
+                    if (outerIsOlder || nodesAreEquallyAsOld) {
                         this.remove(a);
 
                         if (a > 0) {
@@ -40,22 +40,10 @@ public class NodeList extends ArrayList<Node> {
                             b--;
                         }
                     } else {
-                        if (nodesAreEquallyAsOld) {
-                            this.remove(a);
+                        this.remove(b);
 
-                            if (a > 0) {
-                                a--;
-                            }
-
-                            if (b > 0) {
-                                b--;
-                            }
-                        } else {
-                            this.remove(b);
-
-                            if (b > 0) {
-                                b--;
-                            }
+                        if (b > 0) {
+                            b--;
                         }
                     }
                 }
