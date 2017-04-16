@@ -121,7 +121,7 @@ public class TreeTest {
 
     @Test
     public void getSnapshotWithOneUniqueReturnableNodeInMemory() {
-        final Tree tree = new Tree(100000);
+        final Tree tree = new Tree(1000);
 
         final LocalDateTime beginningTime = LocalDateTime.now();
         final LocalDateTime endingTime = LocalDateTime.MAX;
@@ -140,14 +140,13 @@ public class TreeTest {
 
     @Test
     public void getSnapshotWithTwoUniqueReturnableNodesInMemory() {
-        final Tree tree = new Tree(100000);
+        final Tree tree = new Tree(1000);
 
-        final LocalDateTime beforeStartTime = LocalDateTime.of(0, 1, 1, 1, 1);
         final LocalDateTime beginningTime = LocalDateTime.now();
         final LocalDateTime endingTime = LocalDateTime.MAX;
 
-        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beforeStartTime).setValue("Node Value").build();
-        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeA = new NodeBuilder().setKey("Node Key A").setTime(beginningTime).setValue("Node Value").build();
+        final Node nodeB = new NodeBuilder().setKey("Node Key B").setTime(endingTime).setValue("Node Value").build();
 
         tree.put(nodeA);
         tree.put(nodeB);
