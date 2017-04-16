@@ -22,10 +22,7 @@ public class NodeList extends ArrayList<Node> {
                 final String innerKey = innerNode.getKey();
                 final LocalDateTime innerTime = innerNode.getTime();
 
-
-                final boolean keysEqual = outerKey.equals(innerKey);
-
-                if (keysEqual) {
+                if (outerKey.equals(innerKey)) {
                     final boolean outerIsOlder = outerTime.isBefore(innerTime);
                     final boolean nodesAreEquallyAsOld = outerTime.equals(innerTime);
 
