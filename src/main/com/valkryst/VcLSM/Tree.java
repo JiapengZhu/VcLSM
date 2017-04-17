@@ -134,7 +134,6 @@ public class Tree {
 
         // Merge:
         try {
-            writeLock.lock();
             final FileMerger fileMerger = new FileMerger();
             final String fileName = System.currentTimeMillis() + ".dat";
 
@@ -148,8 +147,6 @@ public class Tree {
             logger.error(e.getMessage());
 
             map.putAll(newMap);
-        } finally {
-            writeLock.unlock();
         }
     }
 
