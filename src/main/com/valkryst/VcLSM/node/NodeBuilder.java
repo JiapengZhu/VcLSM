@@ -84,10 +84,12 @@ public class NodeBuilder {
     }
 
     /** Sets the key, time, and value to null. */
-    public void reset() {
+    public NodeBuilder reset() {
         this.key = null;
         this.time = null;
         this.value = null;
+
+        return this;
     }
 
     public NodeBuilder setKey(final String key) {
