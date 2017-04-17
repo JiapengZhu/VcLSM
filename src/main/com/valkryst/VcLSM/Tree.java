@@ -8,10 +8,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Tree {
@@ -21,9 +23,7 @@ public class Tree {
     private int currentSize = 0;
     /** The underlying data structure of the tree. */
     private final ConcurrentSkipListMap<String, Node> map = new ConcurrentSkipListMap<>();
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Lock writeLock = rwLock.writeLock();
-    private final FileSearcher fileSearcher = new FileSearcher();
+    private final Lock writeLock = new ReentrantReadWriteLock().writeLock();
 
 
     /**
@@ -117,7 +117,7 @@ public class Tree {
         }
 
         // Search each of the on-disk files
-        return fileSearcher.search(key);
+        return new FileSearcher().search(key);
     }
 
     private void merge() {
@@ -174,7 +174,7 @@ public class Tree {
         });
 
         // Search on-disk files for any nodes created within the specified time-range:
-        snapshotNodeList.addAll(fileSearcher.rangeSearchFile(beginning, ending));
+        snapshotNodeList.addAll(new FileSearcher().rangeSearchFile(beginning, ending));
         snapshotNodeList.removeDuplicateNodes();
 
         return snapshotNodeList;
