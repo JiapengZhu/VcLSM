@@ -14,7 +14,7 @@ public class NodeBuilder {
     /** The key. */
     @Getter private String key = null;
     /** The date & time at which the node was created. */
-    @Getter private LocalDateTime time = LocalDateTime.now();
+    @Getter private LocalDateTime time = null;
     /** The value. */
     @Getter private String value = null;
 
@@ -81,6 +81,13 @@ public class NodeBuilder {
         }
 
         return this;
+    }
+
+    /** Sets the key, time, and value to null. */
+    public void reset() {
+        this.key = null;
+        this.time = null;
+        this.value = null;
     }
 
     public NodeBuilder setKey(final String key) {
