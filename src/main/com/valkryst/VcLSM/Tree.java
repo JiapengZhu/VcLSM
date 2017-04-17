@@ -150,6 +150,19 @@ public class Tree {
         }
     }
 
+    /**
+     * Retrieves all of the nodes created at, and between, the beginning and ending times.
+     * If two nodes share the same key, then only the most-recent node is returned.
+     *
+     * @param beginning
+     *         The earliest time that a node can have been created, in order to be returned.
+     *
+     * @param ending
+     *         The latest time that a node can have been created, in order to be returned.
+     *
+     * @return
+     *         A collection of nodes, with unique keys, created at, and between, the beginning and ending times.
+     */
     public List<Node> snapshot(final LocalDateTime beginning, final LocalDateTime ending) {
         if (beginning == null || ending == null) {
             return new ArrayList<>();
