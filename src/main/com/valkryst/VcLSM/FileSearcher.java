@@ -104,6 +104,7 @@ public class FileSearcher {
 
         try {
             // Read the contents of the JSON file.
+            final NodeBuilder builder = new NodeBuilder();
             final JsonNode rootNode = new ObjectMapper().readTree(file);
             final Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
 
@@ -114,7 +115,7 @@ public class FileSearcher {
                     final JsonNode jsonNode = entry.getValue();
 
                     // Construct and return the node:
-                    final Node node = new NodeBuilder().loadFromJSON(jsonNode).build();
+                    final Node node = builder.reset().loadFromJSON(jsonNode).build();
                     return Optional.of(node);
                 }
             }
@@ -144,18 +145,18 @@ public class FileSearcher {
         }
 
         try {
+            final NodeBuilder builder = new NodeBuilder();
             final NodeList nodeList = new NodeList();
-
             final JsonNode rootNode = new ObjectMapper().readTree(file);
 
             rootNode.fields().forEachRemaining(entry -> {
                 final JsonNode nodeVal = entry.getValue();
-                // Determine if Node is within specified time-range:
-                //final LocalDateTime nodeTimestamp = LocalDateTime.parse(nodeVal.path("time").asText(), C.FORMATTER);
+
                 final LocalDateTime nodeTimestamp = formatTimeString(nodeVal.path(C.TIME).asText());
+
                 // Construct and add the Node if it's within the time-range:
                 if (Node.isWithinTimeRange(beginning, ending, nodeTimestamp)) {
-                    final Node nodeObj = new NodeBuilder().loadFromJSON(nodeVal).build();
+                    final Node nodeObj = builder.reset().loadFromJSON(nodeVal).build();
                     nodeList.add(nodeObj);
                 }
             });
@@ -169,14 +170,16 @@ public class FileSearcher {
         return new ArrayList<>();
     }
 
-    public static LocalDateTime formatTimeString(String timeStr){
-        while(timeStr.length() < 23){
-            if(!timeStr.contains(".")){
-                timeStr = timeStr + ".";
+    public static LocalDateTime formatTimeString(final String timeStr){
+        final StringBuilder sb = new StringBuilder(timeStr);
+
+        while(sb.length() < 23){
+            if(!sb.toString().contains(".")){
+                sb.append(".");
             }
-            timeStr = timeStr + "0";
+            sb.append("0");
         }
-        LocalDateTime formatedTime = LocalDateTime.parse(timeStr, C.FORMATTER);
-        return formatedTime;
+
+        return LocalDateTime.parse(sb.toString(), C.FORMATTER);
     }
 }
