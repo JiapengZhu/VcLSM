@@ -33,16 +33,12 @@ public class NodeList extends ArrayList<Node> {
                         if (a > 0) {
                             a--;
                         }
-
-                        if (b > 0) {
-                            b--;
-                        }
                     } else {
                         this.remove(b);
+                    }
 
-                        if (b > 0) {
-                            b--;
-                        }
+                    if (b > 0) {
+                        b--;
                     }
                 }
             }
