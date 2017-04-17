@@ -124,24 +124,20 @@ public class Tree {
         // Before Merge:
         writeLock.lock();
 
-        // Create a new in-memory map, this is immutable and will be merged onto disk.
-        // The old in-memory map will is mutable and will be reused.
         final ConcurrentSkipListMap<String, Node> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
+
         map.clear();
         currentSize = 0;
+
         writeLock.unlock();
 
         // Merge:
         try {
             final FileMerger fileMerger = new FileMerger();
-            final String fileName = System.currentTimeMillis() + ".dat";
 
-            // Merge in-memory data into disk
-            fileMerger.mergeToDisk(newMap, fileName);
-
-            // Merge all of the on-disk files:
-            fileMerger.merge(maximumSize);
+            fileMerger.mergeToDisk(newMap, System.currentTimeMillis() + ".dat");
+            fileMerger.mergeOnDiskFiles(maximumSize);
         } catch (final IOException | IllegalStateException e) {
             final Logger logger = LogManager.getLogger();
             logger.error(e.getMessage());
