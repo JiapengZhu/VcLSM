@@ -47,7 +47,7 @@ public class FileMerger {
      *         The maximum size of the tree, in bytes, before a Merge must occur.
      *
      */
-    public void merge(final int maximumTreeSize) {
+    public void mergeOnDiskFiles(final int maximumTreeSize) {
         if (maximumTreeSize < 1) {
             return;
         }
