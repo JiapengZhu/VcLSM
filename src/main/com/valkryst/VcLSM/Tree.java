@@ -169,7 +169,8 @@ public class Tree {
         // Search in-memory nodes for any nodes created within specified time-range:
         map.forEach((key, node) -> {
             if (node.isWithinTimeRange(beginning, ending)) {
-                snapshotNodeList.add(node);
+                // The user shouldn't be able to alter in-memory nodes from the returned nodes, so we use a copy of the node.
+                snapshotNodeList.add(node.copy());
             }
         });
 
