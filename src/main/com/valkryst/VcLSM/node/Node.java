@@ -45,6 +45,14 @@ public class Node implements Comparable<Node> {
         return isEqual;
     }
 
+    /** @return A copy of the Node. */
+    public Node copy() {
+        final NodeBuilder builder = new NodeBuilder();
+        return builder.setKey(key)
+                      .setTime(LocalDateTime.parse(time.toString()))
+                      .setValue(value).build();
+    }
+
     /** @return The key concatenated with the timestamp. */
     public String getKeyWithTimestamp(){
         return key + C.DILIMETER + time;
