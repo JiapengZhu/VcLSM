@@ -88,7 +88,7 @@ public class Tree {
         // If the tree will exceed it's maximum size by adding the new node,
         // then perform a merge before adding the new node.
         if (currentSize + estimatedNodeSize >= maximumSize) {
-            merge();
+            merge(estimatedNodeSize);
         }
 
         map.put(node.getKeyWithTimestamp(), node);
@@ -120,9 +120,16 @@ public class Tree {
         return new FileSearcher().search(key);
     }
 
-    private void merge() {
+    private void merge(final long estimatedNodeSize) {
         // Before Merge:
         writeLock.lock();
+
+        // A merge may have already happened, so we perform a second check to determine if we must still perform
+        // the merge.
+        if (currentSize + estimatedNodeSize < maximumSize) {
+            writeLock.unlock();
+            return;
+        }
 
         final ConcurrentSkipListMap<String, Node> newMap = new ConcurrentSkipListMap<> ();
         newMap.putAll(map);
