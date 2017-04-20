@@ -25,6 +25,18 @@ public class Node implements Comparable<Node> {
         value = builder.getValue();
     }
 
+    /**
+     * Constructs a new Node as a copy of an existing Node.
+     *
+     * @param node
+     *         The node whose data is to be copied.
+     */
+    private Node(final Node node) {
+        this.key = node.getKey();
+        this.time = LocalDateTime.parse(node.getTime().toString());
+        this.value = node.getValue();
+    }
+
     @Override
     public int compareTo(final Node other) {
         return this.time.compareTo(other.time);
@@ -47,10 +59,7 @@ public class Node implements Comparable<Node> {
 
     /** @return A copy of the Node. */
     public Node copy() {
-        final NodeBuilder builder = new NodeBuilder();
-        return builder.setKey(key)
-                      .setTime(LocalDateTime.parse(time.toString()))
-                      .setValue(value).build();
+        return new Node(this);
     }
 
     /** @return The key concatenated with the timestamp. */
