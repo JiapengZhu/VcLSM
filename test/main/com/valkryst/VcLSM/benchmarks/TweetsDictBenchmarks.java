@@ -19,9 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
-/**
- * Created by jiapengzhu on 2017-04-19.
- */
+
 public class TweetsDictBenchmarks extends Thread {
     private final static AtomicInteger count = new AtomicInteger(0);
     private final static ArrayList<String> keyArr = new ArrayList<>();
