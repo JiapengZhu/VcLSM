@@ -44,6 +44,10 @@ public class NodeInstrumentation {
      *         The estimated size of the node, in bytes.
      */
     public static long getNodeSize(final Node node) {
-        return instrumentation.getObjectSize(node);
+        if (node == null) {
+            return 0;
+        } else {
+            return instrumentation.getObjectSize(node);
+        }
     }
 }
