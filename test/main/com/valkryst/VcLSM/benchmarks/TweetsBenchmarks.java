@@ -53,7 +53,7 @@ public class TweetsBenchmarks extends Thread {
 
         try (final Scanner sc = new Scanner(file)) {
             while (sc.hasNext()) {
-                final String[] contentArr = sc.nextLine().split("\t");
+                final String[] contentArr = sc.nextLine().split(",");
                 final String key = contentArr[0];
                 final String value = contentArr[1];
 
@@ -76,7 +76,6 @@ public class TweetsBenchmarks extends Thread {
 
             final long elapsedTime = System.currentTimeMillis() - startTime;
             printReport("LevelDB Put Operation:", elapsedTime);
-            benchmarkLevelDBGetOpt();
             count.set(0);
         }
     }
@@ -90,7 +89,7 @@ public class TweetsBenchmarks extends Thread {
 
         try (final Scanner sc = new Scanner(file)) {
             while (sc.hasNext()) {
-                final String[] contentArr = sc.nextLine().split("\t");
+                final String[] contentArr = sc.nextLine().split(",");
                 final String key = contentArr[0];
                 final String value = contentArr[1];
 
@@ -110,20 +109,16 @@ public class TweetsBenchmarks extends Thread {
             future.cancel(true); //interrupt the job after C.DELAY
             e.printStackTrace();
         } finally {
-            if (!executor.isTerminated()) {
-                System.err.println("cancel non-finished tasks");
-            }
             executor.shutdownNow();
 
             final long elapsedTime = System.currentTimeMillis() - startTime;
             printReport("VcLSM Put Operation:", elapsedTime);
-            benchmarkLevelDBGetOpt();
             count.set(0);
         }
     }
 
     @Test
-    private void benchmarkLevelDBGetOpt() {
+    public void benchmarkLevelDBGetOpt() {
         final long startTime = System.currentTimeMillis();
 
         final ExecutorService executor = Executors.newFixedThreadPool(nThread);
@@ -150,7 +145,7 @@ public class TweetsBenchmarks extends Thread {
     }
 
     @Test
-    private void benchmarkCLSMGetOpt() {
+    public void benchmarkCLSMGetOpt() {
         final long startTime = System.currentTimeMillis();
 
         final ExecutorService executor = Executors.newFixedThreadPool(nThread);
