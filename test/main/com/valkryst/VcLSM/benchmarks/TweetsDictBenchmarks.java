@@ -77,7 +77,6 @@ public class TweetsDictBenchmarks extends Thread {
 
             final long elapsedTime = System.currentTimeMillis() - startTime;
             printReport("LevelDB Put Operation:", elapsedTime);
-            benchmarkLevelDBGetOpt();
             count.set(0);
         }
     }
@@ -117,13 +116,12 @@ public class TweetsDictBenchmarks extends Thread {
 
             final long elapsedTime = System.currentTimeMillis() - startTime;
             printReport("VcLSM Put Operation:", elapsedTime);
-            benchmarkCLSMGetOpt();
             count.set(0);
         }
     }
 
     @Test
-    private void benchmarkLevelDBGetOpt() {
+    public void benchmarkLevelDBGetOpt() {
         final long startTime = System.currentTimeMillis();
 
         final ExecutorService executor = Executors.newFixedThreadPool(nThread);
@@ -150,7 +148,7 @@ public class TweetsDictBenchmarks extends Thread {
     }
 
     @Test
-    private void benchmarkCLSMGetOpt(){
+    public void benchmarkCLSMGetOpt(){
         final long startTime = System.currentTimeMillis();
 
         final ExecutorService executor = Executors.newFixedThreadPool(nThread);
