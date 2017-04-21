@@ -197,13 +197,13 @@ public class TweetsDictBenchmarks extends Thread {
      *         The time it took for the benchmark to complete from start to finish.
      */
     private void printReport(final String operationName, final long elapsedTimeInMillis){
-        final double throughput = (double)count.get() / (double)C.DELAY;
+        final double throughput = (double)count.get() / (double) elapsedTimeInMillis;
 
         final String report = operationName +
                               "\n\tNumber of Threads:\t" + nThread +
                               "\n\tTotal Operations:\t" + count.get() +
                               "\n\tElapsed Time:\t" + elapsedTimeInMillis + "ms" +
-                              "\n\tThroughput:\t" + throughput + " Operations/Second\n\n";
+                              "\n\tThroughput:\t" + throughput + " Operations/Millisecond\n\n";
 
         System.out.println(report);
     }
