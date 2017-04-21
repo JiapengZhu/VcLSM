@@ -5,206 +5,174 @@ import main.com.valkryst.VcLSM.Tree;
 import main.com.valkryst.VcLSM.node.Node;
 import main.com.valkryst.VcLSM.node.NodeBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.*;
-import org.iq80.leveldb.*;
-import org.junit.*;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import static org.iq80.leveldb.impl.Iq80DBFactory.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by jiapengzhu on 2017-04-19.
- */
-public class TweetsBenchmarks extends Thread{
-    private long startTime, endTime, gcRunningTime;
-    private static ReentrantLock lock;
-    private static int count;
-    private static ArrayList<String> keyArr;
-    private static org.apache.logging.log4j.Logger logger;
-    private static String fileName;
-    private static File file;
-    private static int nThread;
+import static org.iq80.leveldb.impl.Iq80DBFactory.*;
+
+public class TweetsBenchmarks extends Thread {
+    private final static AtomicInteger count = new AtomicInteger(0);
+    private final static ArrayList<String> keyArr = new ArrayList<>();
+    private final static File file = new File("res/Test Data/Tweets.dict");
     private static DB db;
-    private static Options options;
-    private static Tree tree;
+    private final static int nThread = 2;
+    private final static Tree tree = new Tree(1000);
 
     @BeforeClass
-    public static void initializeBenchmark(){
-        keyArr = new ArrayList<String>();
-        count = 0;
-        logger = LogManager.getLogger();
-        lock = new ReentrantLock();
-        Scanner sc = null;
-        fileName = "src/Tweets2mi"; // dataset name
-        nThread = 2; // number of threads
-        options = new Options();
-        options.createIfMissing(true);
-        String content = null;
-        try{
-            db = factory.open(new File("levelDB/"), options);
-            tree = new Tree(1000);
-            file = new File(fileName);
-            sc = new Scanner(file);
-            while(sc.hasNext()){
-                content = sc.nextLine();
-                String[] contentArr = content.split("\t");
-                String key = contentArr[0];
-                keyArr.add(key);
+    public static void initializeBenchmark() {
+        try (final Scanner sc = new Scanner(file)) {
+            db = factory.open(new File("levelDB/"), new Options());
 
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            sc.forEachRemaining(string -> {
+                final String[] contentArr = sc.next().split(",");
+                final String key = contentArr[0];
+                keyArr.add(key);
+            });
+        } catch (final IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Test
-    public void benchmarkLevelDB(){
-        ExecutorService executor = null;
+    public void benchmarkLevelDB() {
+        final long startTime = System.currentTimeMillis();
+
+        final ExecutorService executor = Executors.newFixedThreadPool(nThread);
         Future<?> future = null;
-        Scanner sc = null;
-        String content = null;
-        String optName = "LevelDB Put Operation: ";
-        try{
-            executor = Executors.newFixedThreadPool(nThread); // Set up number of threads
-            sc = new Scanner(file);
-            while(sc.hasNext()){
-                content = sc.nextLine();
-                String[] contentArr = content.split("\t");
-                String key = contentArr[0];
-                String value = contentArr[1];
+
+        try (final Scanner sc = new Scanner(file)) {
+            while (sc.hasNext()) {
+                final String[] contentArr = sc.nextLine().split("\t");
+                final String key = contentArr[0];
+                final String value = contentArr[1];
+
                 future = executor.submit(() -> {
                     db.put(bytes(key), bytes(value));
-                    increment();
+                    count.incrementAndGet();
                 });
             }
-            future.get(C.DELAY, TimeUnit.SECONDS);
-        }catch (InterruptedException e){
+
+            if (future != null) {
+                future.get(C.DELAY, TimeUnit.SECONDS);
+            }
+        } catch (final InterruptedException | IOException | ExecutionException e){
             e.printStackTrace();
-        }catch (ExecutionException e) {
-            e.printStackTrace();
-        }catch (TimeoutException e) {
+        } catch (final TimeoutException e) {
             future.cancel(true); //interrupt the job
             e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
-            if (!executor.isTerminated()) {
-                System.err.println("Cancel non-finished tasks");
-            }
             executor.shutdownNow();
-            sc.close();
-            // System.out.println("Shutdown finished");
-            logger.info(printReport(optName));
-            System.out.println(printReport(optName));
+
+            final long elapsedTime = System.currentTimeMillis() - startTime;
+            printReport("LevelDB Put Operation:", elapsedTime);
             benchmarkLevelDBGetOpt();
+            count.set(0);
         }
     }
 
     @Test
-    public void benchmarkCLSM(){
-        ExecutorService executor = null;
-        Future<?> future = null;
-        Scanner sc = null;
-        String content = null;
-        String optName = "cLSM Put Operation: ";
-        try{
-            sc = new Scanner(file);
-            executor = Executors.newFixedThreadPool(nThread);
+    public void benchmarkCLSM() {
+        final long startTime = System.currentTimeMillis();
 
-            while(sc.hasNext()){
-                content = sc.nextLine();
-                String[] contentArr = content.split("\t");
-                String key = contentArr[0];
-                String value = contentArr[1];
+        final ExecutorService executor = Executors.newFixedThreadPool(nThread);
+        Future<?> future = null;
+
+        try (final Scanner sc = new Scanner(file)) {
+            while (sc.hasNext()) {
+                final String[] contentArr = sc.nextLine().split("\t");
+                final String key = contentArr[0];
+                final String value = contentArr[1];
+
                 future = executor.submit(() -> {
                     final Node node = new NodeBuilder().setKey(key).setValue(value).build();
                     tree.put(node);
-                    increment();
+                    count.incrementAndGet();
                 });
             }
-            future.get(C.DELAY, TimeUnit.SECONDS);
-        }catch (InterruptedException e){
+
+            if (future != null) {
+                future.get(C.DELAY, TimeUnit.SECONDS);
+            }
+        } catch (final InterruptedException | FileNotFoundException | ExecutionException e) {
             e.printStackTrace();
-        }catch (ExecutionException e) {
-            e.printStackTrace();
-        }catch (TimeoutException e) {
+        } catch (final TimeoutException e) {
             future.cancel(true); //interrupt the job after C.DELAY
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
             if (!executor.isTerminated()) {
                 System.err.println("cancel non-finished tasks");
             }
             executor.shutdownNow();
-            sc.close();
-            System.out.println("shutdown finished");
-            logger.info(printReport(optName));
-            System.out.println(printReport(optName));
-            benchmarkCLSMGetOpt();
+
+            final long elapsedTime = System.currentTimeMillis() - startTime;
+            printReport("VcLSM Put Operation:", elapsedTime);
+            benchmarkLevelDBGetOpt();
+            count.set(0);
         }
     }
 
+    @Test
+    private void benchmarkLevelDBGetOpt() {
+        final long startTime = System.currentTimeMillis();
 
-    private void benchmarkLevelDBGetOpt(){
-        clearCounter();
-        ExecutorService executor = null;
+        final ExecutorService executor = Executors.newFixedThreadPool(nThread);
         Future<?> future = null;
-        executor = Executors.newFixedThreadPool(nThread);
-        String optName = "LevelDB Get Operation: ";
+
         try {
             for(String key : keyArr){
                 future = executor.submit(() -> {
-                    String value = asString(db.get(bytes(key)));
-                    increment();
+                    asString(db.get(bytes(key)));
+                    count.incrementAndGet();
                 });
             }
-            future.get(C.DELAY, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+
+            if (future != null) {
+                future.get(C.DELAY, TimeUnit.SECONDS);
+            }
+        } catch (final InterruptedException | TimeoutException | ExecutionException e) {
             e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }finally {
-            System.out.println("\n" + printReport(optName));
-            clearCounter();
+        } finally {
+            final long elapsedTime = System.currentTimeMillis() - startTime;
+            printReport("LevelDB Get Operation:", elapsedTime);
+            count.set(0);
         }
     }
 
-    private void benchmarkCLSMGetOpt(){
-        clearCounter();
-        ExecutorService executor = null;
+    @Test
+    private void benchmarkCLSMGetOpt() {
+        final long startTime = System.currentTimeMillis();
+
+        final ExecutorService executor = Executors.newFixedThreadPool(nThread);
         Future<?> future = null;
-        executor = Executors.newFixedThreadPool(nThread);
-        String optName = "cLSM Get Operation: ";
+
         try {
             for(String key : keyArr){
                 future = executor.submit(() -> {
-                    Optional<Node> retrievedNode = tree.get(key);
-                    increment();
+                    tree.get(key);
+                    count.incrementAndGet();
                 });
             }
-            future.get(C.DELAY, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+
+            if (future != null) {
+                future.get(C.DELAY, TimeUnit.SECONDS);
+            }
+        } catch (final InterruptedException | TimeoutException | ExecutionException e) {
             e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }finally {
-            System.out.println("\n" + printReport(optName));
-            clearCounter();
+        } finally {
+            final long elapsedTime = System.currentTimeMillis() - startTime;
+            printReport("VcLSM Get Operation:", elapsedTime);
+            count.set(0);
         }
     }
 
@@ -213,35 +181,32 @@ public class TweetsBenchmarks extends Thread{
     public static void stopBenchmark(){
         try {
             keyArr.clear();
+            db.close();
             FileUtils.deleteDirectory(new File("data/"));
             FileUtils.deleteDirectory(new File("levelDB/"));
-            db.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
 
-    private int increment(){
-        lock.lock();
-        try {
-            count++;
-        } finally {
-            lock.unlock();
-        }
-        return count;
-    }
+    /**
+     * Prints a report for the most recently run benchmark.
+     *
+     * @param operationName
+     *         The name of the benchmark operation.
+     *
+     * @param elapsedTimeInMillis
+     *         The time it took for the benchmark to complete from start to finish.
+     */
+    private void printReport(final String operationName, final long elapsedTimeInMillis){
+        final double throughput = (double)count.get() / (double)C.DELAY;
 
-    private void clearCounter(){
-        count = 0;
-    }
+        final String report = operationName +
+                "\n\tNumber of Threads:\t" + nThread +
+                "\n\tTotal Operations:\t" + count.get() +
+                "\n\tElapsed Time:\t" + elapsedTimeInMillis + "ms" +
+                "\n\tThroughput:\t" + throughput + " Operations/Second\n\n";
 
-    private String printReport(String optName){
-        double throughput = (double)count / (double)C.DELAY;
-        String report = optName + "\nNumber of threads: " + nThread +
-                "\nTotal operation counts: " + count +
-                "\nTime eclipse: " + C.DELAY + " sec" +
-                "\nThroughput: " + throughput + " opts/sec";
-        return report;
+        System.out.println(report);
     }
-
 }
