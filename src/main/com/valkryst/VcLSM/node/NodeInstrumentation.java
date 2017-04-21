@@ -46,8 +46,12 @@ public class NodeInstrumentation {
     public static long getNodeSize(final Node node) {
         if (node == null) {
             return 0;
-        } else {
+        }
+
+        try {
             return instrumentation.getObjectSize(node);
+        } catch (final NullPointerException e) {
+            return 0;
         }
     }
 }
