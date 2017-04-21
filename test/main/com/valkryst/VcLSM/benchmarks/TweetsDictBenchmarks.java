@@ -209,6 +209,5 @@ public class TweetsDictBenchmarks extends Thread {
 
         System.out.println(report);
     }
-
 }
 
