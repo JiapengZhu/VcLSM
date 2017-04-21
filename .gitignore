@@ -45,6 +45,7 @@ fabric.properties
 
 # Log files
 /log/
+/res/Test Data/
 
 target/*
 *.class
